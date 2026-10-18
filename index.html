@@ -22,11 +22,11 @@
   <div class="wrap nav-in">
     <a href="#top" class="logo" aria-label="Touch22 home">TOUCH<b>22</b></a>
     <nav class="nav-links" id="navLinks" aria-label="Main">
-      <a href="#collections">Collections</a>
+      <a href="catalogue.html">Catalogue</a>
       <a href="#ai-studio">AI Studio</a>
       <a href="#see-it">See it work</a>
-      <a href="#roadmap">Roadmap</a>
-      <a href="#enquiry">Trade enquiry</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
       <a href="demos/" class="m-only">Open live demos →</a>
     </nav>
     <a class="btn btn-gold" href="demos/">Open live demos <span class="arr">→</span></a>
@@ -45,7 +45,7 @@
       <p class="lede rv d2">Touch22 makes and supplies 22KT, 18KT and 9KT jewellery to retailers across India and abroad. Our AI Studio answers trade buyers instantly, follows up every cart, writes our Instagram, keeps product photos true to the design and remembers every retailer's big day.</p>
       <div class="hero-cta rv d3">
         <a class="btn btn-gold" href="#ai-studio">Explore the AI Studio <span class="arr">→</span></a>
-        <a class="btn btn-ghost" href="#collections">View collections</a>
+        <a class="btn btn-ghost" href="catalogue.html">Browse the catalogue</a>
       </div>
       <div class="hero-meta rv d3">
         <div><b>3</b>purities: T-22, T-18, T-9</div>
@@ -81,15 +81,15 @@
       <p class="lede rv d2">Three signature lines sit alongside our core range. Retailers browse the daily catalogue on touch22.in, add designs to a cart, and our team takes it from there.</p>
     </div>
     <div class="cols">
-      <a class="col-card rv" href="demos/#ask">
+      <a class="col-card rv" href="catalogue.html?col=ELIRA">
         <img src="https://images.unsplash.com/photo-1758995115857-2de1eb6283d0?auto=format&fit=crop&w=900&q=80" alt="Gold necklace and earrings on white display stands" loading="lazy">
         <div class="col-body"><div class="tagline">Contemporary · CZ</div><h3>ELIRA</h3><p>Light, bright CZ pieces for everyday glamour and modern bridal counters.</p></div>
       </a>
-      <a class="col-card rv d1" href="demos/#ask">
+      <a class="col-card rv d1" href="catalogue.html?col=NAVYA">
         <img src="https://images.unsplash.com/photo-1631982686092-e6561a853187?auto=format&fit=crop&w=900&q=80" alt="A diamond-look ring on a white surface" loading="lazy">
         <div class="col-body"><div class="tagline">Heritage · Moissanite</div><h3>NAVYA</h3><p>Moissanite brilliance set in heritage forms, from halo rings to mangalsutras.</p></div>
       </a>
-      <a class="col-card rv d2" href="demos/#ask">
+      <a class="col-card rv d2" href="catalogue.html?col=NAAZ">
         <img src="https://images.unsplash.com/photo-1709295208567-ce817387e977?auto=format&fit=crop&w=900&q=80" alt="Ornate gold jewellery on display in a bazaar" loading="lazy">
         <div class="col-body"><div class="tagline">Bold · Turkish</div><h3>NAAZ</h3><p>Statement Turkish-inspired kadas and chandbalis with colour stones.</p></div>
       </a>
@@ -99,6 +99,11 @@
       <div class="pur rv d1"><div class="kt">T-18</div><div><b>18KT · 75.0</b><span>CZ, moissanite, rose gold and diamond-look.</span></div></div>
       <div class="pur rv d2"><div class="kt">T-9</div><div><b>9KT · 37.5</b><span>Gifting, couple bands and light fashion gold.</span></div></div>
     </div>
+    <div class="sec-head" style="margin:90px 0 30px">
+      <div><div class="eyebrow rv">Trending@Touch</div><h2 class="rv d1" style="font-size:clamp(2rem,3.6vw,3rem)">What retailers reordered this month.</h2></div>
+      <a class="btn btn-dark rv d2" href="catalogue.html">See all designs <span class="arr">→</span></a>
+    </div>
+    <div class="pgrid" id="trending" style="padding:0"></div>
   </div>
 </section>
 
@@ -272,11 +277,11 @@
   <div class="wrap">
     <div class="foot">
       <div>
-        <a href="#top" class="logo">TOUCH<b>22</b></a>
+        <a href="index.html" class="logo">TOUCH<b>22</b></a>
         <p>A Different Gold Experience. B2B gold jewellery in 22KT, 18KT and 9KT for retailers in India and overseas.</p>
       </div>
       <div><h4>Visit</h4><ul><li>Unitouch Creations LLP</li><li>Ruby Chambers, Dhanji Street</li><li>Zaveri Bazaar, Mumbai 400003</li></ul></div>
-      <div><h4>Explore</h4><ul><li><a href="#collections">Collections</a></li><li><a href="demos/">AI Studio demos</a></li><li><a href="#roadmap">Roadmap</a></li><li><a href="#enquiry">Trade enquiry</a></li></ul></div>
+      <div><h4>Explore</h4><ul><li><a href="catalogue.html">Catalogue</a></li><li><a href="index.html#ai-studio">AI Studio</a></li><li><a href="demos/">Live demos</a></li><li><a href="about.html">About us</a></li><li><a href="contact.html">Contact</a></li></ul></div>
       <div><h4>Follow</h4><ul><li><a href="https://www.instagram.com/touch22.in/" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://www.facebook.com/touch22gold/" target="_blank" rel="noopener">Facebook</a></li><li><a href="https://touch22.in" target="_blank" rel="noopener">touch22.in portal</a></li></ul></div>
     </div>
     <div class="foot-b"><span>© <span id="yr">2026</span> Unitouch Creations LLP</span><span>Photography: free stock images from <a href="https://unsplash.com/s/photos/gold-jewellery" target="_blank" rel="noopener">Unsplash</a>, standing in for Touch22's own product shots.</span></div>
@@ -284,6 +289,13 @@
 </footer>
 
 <div class="toast" id="toast" role="status"></div>
+<script src="assets/js/data.js"></script>
 <script src="assets/js/site.js"></script>
+<script>
+/* Trending@Touch strip: top designs from the shared catalogue data */
+(function(){var T=window.T22,el=document.getElementById("trending");if(!T||!el)return;
+["T22-BG-150","T22-RG-207","T22-ER-322","T22-MS-402"].map(T.byCode).forEach(function(p,i){var s=T.stockLabel(p);
+el.insertAdjacentHTML("beforeend",'<article class="pc"><a class="ph" href="catalogue.html?q='+p.code+'" aria-label="'+p.name+'"><img src="'+p.image(600)+'" alt="'+p.name+'" loading="lazy"><span class="badges"><span class="badge new">#'+(i+1)+'</span></span></a><div class="bd"><span class="code">'+p.code+' · '+p.kt+'KT</span><h3>'+p.name+'</h3><span class="meta">'+p.nw+' g net</span><div class="ft"><span class="stk '+s[0]+'">'+s[1]+'</span><a class="add" style="text-decoration:none" href="catalogue.html?q='+p.code+'">View</a></div></div></article>');});})();
+</script>
 </body>
 </html>

@@ -2,17 +2,17 @@
 "use strict";
 const $ = s => document.querySelector(s);
 
-/* Contact settings. Put Touch22's WhatsApp Business number here (country code, digits only, e.g. "919800000000").
-   Left empty, the enquiry form opens WhatsApp and lets the sender pick the chat. */
-const CONTACT = { whatsapp: "" };
+/* Contact settings live in assets/js/data.js (T22.CONTACT). */
+const CONTACT = (window.T22 && window.T22.CONTACT) || { whatsapp: "" };
 
 /* Toast */
 let tT;
-function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("show"),2800);}
+function toast(m){const t=$("#toast");if(!t)return;t.textContent=m;t.classList.add("show");clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("show"),2800);}
 
 /* Nav: solid on scroll, mobile menu */
 const nav=$("#nav");
-const onScroll=()=>nav.classList.toggle("solid",window.scrollY>40);
+const fixedSolid=document.body.classList.contains("light-top");
+const onScroll=()=>nav.classList.toggle("solid",fixedSolid||window.scrollY>40);
 onScroll();window.addEventListener("scroll",onScroll,{passive:true});
 $("#burger").addEventListener("click",()=>{const open=document.body.classList.toggle("menu-open");$("#burger").setAttribute("aria-expanded",open);if(open)nav.classList.add("solid");else onScroll();});
 document.querySelectorAll("#navLinks a").forEach(a=>a.addEventListener("click",()=>{document.body.classList.remove("menu-open");$("#burger").setAttribute("aria-expanded","false");}));
@@ -25,7 +25,7 @@ const io="IntersectionObserver" in window ? new IntersectionObserver(es=>es.forE
 document.querySelectorAll(".rv").forEach(el=>io?io.observe(el):el.classList.add("in"));
 
 /* Year */
-$("#yr").textContent=new Date().getFullYear();
+if($("#yr"))$("#yr").textContent=new Date().getFullYear();
 
 /* Before/after compare */
 const rng=$("#cmpRange");
@@ -67,13 +67,15 @@ if(log){
 }
 
 /* Enquiry form -> WhatsApp */
-$("#enqForm").addEventListener("submit",e=>{
+if($("#enqForm"))$("#enqForm").addEventListener("submit",e=>{
   e.preventDefault();
   const v=id=>$(id).value.trim();
   if(!v("#eName")||!v("#eStore")){toast("Please add your name and store");(v("#eName")?$("#eStore"):$("#eName")).focus();return;}
   const text=`Hello Touch22, I'm ${v("#eName")} from ${v("#eStore")}${v("#eCity")?", "+v("#eCity"):""}. I'm interested in: ${v("#eInt")}.${v("#eMsg")?"\n"+v("#eMsg"):""}\nPlease send today's catalogue.`;
   const url=`https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(text)}`;
   window.open(url,"_blank","noopener");
+  e.target.reset();
   toast("Opening WhatsApp with your enquiry");
 });
+window.T22toast=toast;
 })();
