@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ready-stock catalogue · Touch22</title>
+<meta name="description" content="Browse Touch22's ready-stock gold jewellery in 22KT, 18KT and 9KT: bangles, rings, earrings, mangalsutras, chains and more. Build a trade cart and send it on WhatsApp.">
+<meta name="theme-color" content="#0F0D0A">
+<meta property="og:title" content="Ready-stock catalogue · Touch22">
+<meta property="og:description" content="Browse Touch22's ready-stock gold jewellery in 22KT, 18KT and 9KT: bangles, rings, earrings, mangalsutras, chains and more. Build a trade cart and send it on WhatsApp.">
+<meta property="og:image" content="https://images.unsplash.com/photo-1758995116383-f51775896add?auto=format&fit=crop&w=1200&q=80">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F0D0A'/%3E%3Ctext x='32' y='42' font-family='Georgia' font-size='26' fill='%23E8C77F' text-anchor='middle'%3E22%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body class="light-top">
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a href="index.html" class="logo" aria-label="Touch22 home">TOUCH<b>22</b></a>
+    <nav class="nav-links" id="navLinks" aria-label="Main">
+      <a href="catalogue.html" aria-current="page">Catalogue</a>
+      <a href="index.html#ai-studio">AI Studio</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="demos/index.html" class="m-only">Open live demos →</a>
+    </nav>
+    <a class="btn btn-gold" href="demos/index.html">Open live demos <span class="arr">→</span></a>
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span></button>
+  </div>
+</header>
+<main>
+<section class="page-head">
+  <div class="wrap">
+    <div class="crumbs"><a href="index.html">Home</a> / Catalogue</div>
+    <div class="sec-head" style="margin-bottom:0">
+      <div>
+        <div class="eyebrow">Ready stock · for trade buyers</div>
+        <h1>The Touch22 catalogue</h1>
+        <p class="lede">Every design with its code, purity, weight and an estimate at today's gold rate. Add designs to your trade cart and send it to our sales team on WhatsApp in one tap.</p>
+      </div>
+      <label class="rate-box" for="rate">22KT rate ₹/g <input id="rate" type="number" inputmode="numeric" min="1000" step="10"></label>
+    </div>
+  </div>
+</section>
+
+<div class="toolbar" id="toolbar">
+  <div class="wrap">
+    <div class="tb-row">
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><label class="sr-only" for="q">Search designs</label><input id="q" type="search" placeholder="Search by name or code, e.g. jhumka, T22-RG-212" autocomplete="off"></div>
+      <label class="sr-only" for="fCol">Collection</label><select class="sel" id="fCol"><option value="">All collections</option><option>ELIRA</option><option>NAVYA</option><option>NAAZ</option><option>Core</option><option value="Men">Men's</option><option>Gifting</option></select>
+      <label class="sr-only" for="fKt">Purity</label><select class="sel" id="fKt"><option value="">All purities</option><option value="22">T-22 · 22KT</option><option value="18">T-18 · 18KT</option><option value="9">T-9 · 9KT</option></select>
+      <label class="sr-only" for="fSort">Sort</label><select class="sel" id="fSort"><option value="feat">Featured</option><option value="new">New arrivals</option><option value="wt-asc">Weight: light to heavy</option><option value="wt-desc">Weight: heavy to light</option><option value="pr-asc">Price: low to high</option><option value="pr-desc">Price: high to low</option></select>
+      <button class="cart-btn" id="openCart" type="button" aria-label="Open trade cart">Trade cart <span class="ct" id="cartCt">0</span></button>
+    </div>
+    <div class="tb-row">
+      <div class="chiprow" id="cats" role="group" aria-label="Category"></div>
+      <label class="tog"><input type="checkbox" id="fStock"> In stock only</label>
+      <span class="count" id="count" aria-live="polite"></span>
+    </div>
+  </div>
+</div>
+
+<section class="wrap">
+  <div class="pgrid" id="grid"></div>
+  <div class="empty-state" id="empty" hidden><h3>No designs match</h3><p>Try another category or clear the search.</p><p style="margin-top:18px"><button class="btn btn-dark" id="reset" type="button">Show all designs</button></p></div>
+</section>
+</main>
+
+<dialog class="qv" id="qv" aria-labelledby="qvName">
+  <div class="qv-in">
+    <div class="qv-img"><img id="qvImg" alt=""></div>
+    <div class="qv-bd">
+      <button class="qv-x" id="qvClose" type="button" aria-label="Close">✕</button>
+      <div class="eyebrow" id="qvCol"></div>
+      <h2 id="qvName"></h2>
+      <p class="lede" id="qvDesc" style="font-size:.98rem"></p>
+      <dl class="specs" id="qvSpecs"></dl>
+      <div id="qvPrice" style="font-family:var(--f-display);font-size:2rem;line-height:1.1"></div>
+      <div class="qv-actions">
+        <div class="qty"><button type="button" id="qvMinus" aria-label="Less">−</button><span id="qvQty">1</span><button type="button" id="qvPlus" aria-label="More">+</button></div>
+        <button class="btn btn-gold" id="qvAdd" type="button">Add to trade cart</button>
+      </div>
+      <a class="form-note" id="qvAsk" href="#" target="_blank" rel="noopener" style="color:var(--gold-lo);font-weight:600;text-decoration:none">Ask about this design on WhatsApp →</a>
+    </div>
+  </div>
+</dialog>
+
+<button class="cart-btn cart-fab" id="openCart2" type="button" aria-label="Open trade cart">Cart <span class="ct" id="cartCt2">0</span></button>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Trade cart" aria-hidden="true">
+  <div class="dr-h"><h2>Trade cart</h2><button class="qv-x" style="position:static" id="closeCart" type="button" aria-label="Close cart">✕</button></div>
+  <div class="dr-b" id="lines"></div>
+  <div class="dr-f">
+    <div class="tot" id="tot"></div>
+    <div class="two"><label class="sr-only" for="cStore">Store name</label><input id="cStore" placeholder="Store name" autocomplete="organization"><label class="sr-only" for="cCity">City</label><input id="cCity" placeholder="City" autocomplete="address-level2"></div>
+    <button class="btn btn-gold" id="send" type="button" style="justify-content:center">Send enquiry on WhatsApp <span class="arr">→</span></button>
+    <button class="btn btn-ghost" id="clear" type="button" style="justify-content:center;padding:10px">Clear cart</button>
+    <p class="note">Estimate = net weight × gold rate for the purity × (1 + making %) + stone charges, plus 3% GST. Our sales team confirms final weights and price.</p>
+  </div>
+</aside>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a href="index.html" class="logo">TOUCH<b>22</b></a>
+        <p>A Different Gold Experience. B2B gold jewellery in 22KT, 18KT and 9KT for retailers in India and overseas.</p>
+      </div>
+      <div><h4>Visit</h4><ul><li>Unitouch Creations LLP</li><li>Ruby Chambers, Dhanji Street</li><li>Zaveri Bazaar, Mumbai 400003</li></ul></div>
+      <div><h4>Explore</h4><ul><li><a href="catalogue.html">Catalogue</a></li><li><a href="index.html#ai-studio">AI Studio</a></li><li><a href="demos/index.html">Live demos</a></li><li><a href="about.html">About us</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+      <div><h4>Follow</h4><ul><li><a href="https://www.instagram.com/touch22.in/" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://www.facebook.com/touch22gold/" target="_blank" rel="noopener">Facebook</a></li><li><a href="https://touch22.in" target="_blank" rel="noopener">touch22.in portal</a></li></ul></div>
+    </div>
+    <div class="foot-b"><span>© <span id="yr">2026</span> Unitouch Creations LLP</span><span>Photography: free stock images from <a href="https://unsplash.com/s/photos/gold-jewellery" target="_blank" rel="noopener">Unsplash</a>, standing in for Touch22's own product shots.</span></div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/catalogue.js"></script>
+</body>
+</html>

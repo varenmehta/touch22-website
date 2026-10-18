@@ -1,0 +1,968 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Touch22 AI Studio · Live demos</title><meta name="description" content="Interactive demos of the Touch22 AI automations: trade assistant, cart follow-up, content studio, photo studio, retailer care and Trending@Touch."><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F0D0A'/%3E%3Ctext x='32' y='42' font-family='Georgia' font-size='26' fill='%23E8C77F' text-anchor='middle'%3E22%3C/text%3E%3C/svg%3E"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an app shell. Brand bar + tab rail on top, one working screen per AI automation below. */
+:root{
+  --bg:#F5F6F3; --surface:#FFFFFF; --surface-2:#ECEFEA; --line:#D9DED7;
+  --ink:#16201E; --ink-2:#4F5B57; --ink-3:#7C8783;
+  --peacock:#0E5A54; --peacock-2:#E1EFEC; --on-peacock:#FFFFFF;
+  --gold:#A87A1C; --gold-2:#F4E8CC; --gold-ink:#6E4E0D;
+  --wa:#DCF8C6; --wa-ink:#11291C; --wa-bg:#E9E3DA;
+  --good:#1F7A3E; --warn:#A6620B; --bad:#B23A2E;
+  --shadow:0 1px 2px rgba(20,32,30,.06),0 8px 24px rgba(20,32,30,.06);
+  --f-display:"Tenor Sans","Optima","Candara","Segoe UI",sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1413; --surface:#141D1C; --surface-2:#1B2624; --line:#2A3735;
+  --ink:#E8EEEC; --ink-2:#AAB6B2; --ink-3:#7D8A86;
+  --peacock:#4FB3A8; --peacock-2:#183230; --on-peacock:#06201D;
+  --gold:#E2B654; --gold-2:#3A2E14; --gold-ink:#F1D48E;
+  --wa:#1F4A33; --wa-ink:#E3F5E8; --wa-bg:#101A18;
+  --good:#5BC682; --warn:#E6A24A; --bad:#EE7B6E;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1413; --surface:#141D1C; --surface-2:#1B2624; --line:#2A3735;
+  --ink:#E8EEEC; --ink-2:#AAB6B2; --ink-3:#7D8A86;
+  --peacock:#4FB3A8; --peacock-2:#183230; --on-peacock:#06201D;
+  --gold:#E2B654; --gold-2:#3A2E14; --gold-ink:#F1D48E;
+  --wa:#1F4A33; --wa-ink:#E3F5E8; --wa-bg:#101A18;
+  --good:#5BC682; --warn:#E6A24A; --bad:#EE7B6E;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0;letter-spacing:.01em}
+h2{font-size:1.6rem;line-height:1.2}
+h3{font-size:1.1rem}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.muted{color:var(--ink-2)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--peacock);outline-offset:2px}
+
+/* Top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.brandrow{display:flex;align-items:center;gap:14px;padding-block:12px;flex-wrap:wrap}
+.mark{font-family:var(--f-display);font-size:1.35rem;letter-spacing:.18em}
+.mark b{color:var(--gold);font-weight:400}
+.tag{font-size:.8rem;color:var(--ink-3);border-left:1px solid var(--line);padding-left:14px}
+.rate{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--ink-2)}
+.rate input{width:92px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface-2);font-family:var(--f-mono)}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:10px 14px 12px;white-space:nowrap;color:var(--ink-2);font-weight:500;border-bottom:2px solid transparent;font-size:.92rem}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--peacock);border-bottom-color:var(--peacock)}
+.tab .n{font-family:var(--f-mono);font-size:.7rem;color:var(--ink-3);margin-right:6px}
+
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--gold-2);color:var(--gold-ink);border-radius:8px;padding:10px 14px;font-size:.85rem;margin-top:16px}
+.note strong{font-weight:600}
+main{padding-block:20px 60px}
+.screen-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.screen-head .lede{max-width:62ch;color:var(--ink-2);margin-top:6px}
+.who{display:flex;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);font-weight:500;white-space:nowrap}
+.pill.live{background:var(--peacock-2);color:var(--peacock)}
+.pill.gold{background:var(--gold-2);color:var(--gold-ink)}
+.pill.good{color:var(--good)}
+.pill.warn{color:var(--warn)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:600;font-size:.88rem;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--peacock);border-color:var(--peacock);color:var(--on-peacock)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.small{padding:5px 10px;font-size:.8rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.84rem;color:var(--ink-2);text-align:left}
+.chip:hover{border-color:var(--peacock);color:var(--peacock)}
+.chip[aria-pressed="true"]{background:var(--peacock);color:var(--on-peacock);border-color:var(--peacock)}
+
+/* ASK */
+.ask{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+.chat{display:flex;flex-direction:column;min-height:620px;overflow:hidden}
+.chat-head{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--peacock);color:var(--on-peacock);display:grid;place-items:center;font-family:var(--f-display);font-size:.8rem;letter-spacing:.06em;flex:none}
+.chat-head .t{font-weight:600}
+.chat-head .s{font-size:.78rem;color:var(--ink-3)}
+.chat-head .pill{margin-left:auto}
+.log{flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px;max-height:640px}
+.msg{max-width:88%;display:flex;flex-direction:column;gap:8px}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.bubble{padding:10px 14px;border-radius:14px;background:var(--surface-2);font-size:.93rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.me .bubble{background:var(--peacock);color:var(--on-peacock);border-bottom-right-radius:4px}
+.msg.bot .bubble{border-bottom-left-radius:4px}
+.bubble ul{margin:4px 0;padding-left:18px;white-space:normal}
+.src{font-size:.72rem;color:var(--ink-3)}
+.typing{display:inline-flex;gap:4px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--ink-3);animation:bl 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,100%{opacity:.25}50%{opacity:1}}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;width:100%}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.pimg{aspect-ratio:1/1;max-width:100%;background:var(--surface-2);position:relative}
+.pimg svg,.pimg img{width:100%;height:100%;display:block;object-fit:cover}
+.pimg .lbl{position:absolute;left:6px;bottom:6px;font-size:.62rem;background:rgba(0,0,0,.45);color:#fff;padding:1px 6px;border-radius:4px;letter-spacing:.04em}
+.pbody{padding:8px 10px 10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.pcode{font-family:var(--f-mono);font-size:.72rem;color:var(--ink-3)}
+.pname{font-weight:600;font-size:.86rem;line-height:1.25}
+.pmeta{font-size:.76rem;color:var(--ink-2);font-family:var(--f-mono)}
+.pfoot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:6px;gap:6px}
+.stock{font-size:.72rem;font-weight:600}
+.stock.ok{color:var(--good)}.stock.low{color:var(--warn)}.stock.out{color:var(--bad)}
+.composer{border-top:1px solid var(--line);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.composer form{display:flex;gap:8px}
+.composer input{flex:1;min-width:0;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2)}
+.side{display:flex;flex-direction:column;gap:18px}
+.side .panel{padding:16px}
+.cartline{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding-block:8px;border-bottom:1px solid var(--line)}
+.cartline:last-child{border-bottom:0}
+.thumb{width:42px;height:42px;border-radius:6px;overflow:hidden;background:var(--surface-2)}
+.thumb svg,.thumb img{width:100%;height:100%;display:block;object-fit:cover}
+.qty{display:flex;align-items:center;gap:4px}
+.qty button{width:22px;height:22px;border-radius:5px;border:1px solid var(--line);background:var(--surface);line-height:1;padding:0}
+.totals{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:.85rem;margin-top:10px}
+.totals .big{font-weight:700;font-size:1rem}
+.empty{color:var(--ink-3);font-size:.85rem;padding-block:8px}
+.how{font-size:.84rem;color:var(--ink-2);display:flex;flex-direction:column;gap:8px}
+.how li{margin-left:-4px}
+.how ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+
+/* FLOW */
+.flow{display:grid;grid-template-columns:minmax(0,1.1fr) 340px minmax(0,1fr);gap:18px;align-items:start}
+.steps{padding:8px 0}
+.step{display:grid;grid-template-columns:70px 22px minmax(0,1fr);gap:10px;padding:10px 16px;border:0;background:none;text-align:left;width:100%;opacity:.45}
+.step.on{opacity:1}
+.step.cur{background:var(--peacock-2)}
+.step .tm{font-family:var(--f-mono);font-size:.75rem;color:var(--ink-3);padding-top:2px}
+.step .ic{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.7rem;background:var(--surface)}
+.step.on .ic{border-color:var(--peacock);background:var(--peacock);color:var(--on-peacock)}
+.step .tt{font-weight:600;font-size:.9rem}
+.step .dd{font-size:.82rem;color:var(--ink-2)}
+.phone{background:var(--wa-bg);border-radius:22px;border:8px solid var(--ink);overflow:hidden;display:flex;flex-direction:column;height:600px}
+.phone-top{background:#075E54;color:#fff;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:.85rem}
+.phone-top .avatar{width:30px;height:30px;background:#fff;color:#075E54;font-size:.65rem}
+.phone-log{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.wa{max-width:85%;padding:7px 10px 4px;border-radius:8px;font-size:.82rem;white-space:pre-wrap;background:var(--surface);color:var(--ink);box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.wa.out{align-self:flex-end;background:var(--wa);color:var(--wa-ink)}
+.wa .when{display:block;text-align:right;font-size:.62rem;opacity:.6;margin-top:2px}
+.wa .btns{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.wa .btns span{border:1px solid currentColor;border-radius:6px;padding:2px 8px;font-size:.72rem;opacity:.8}
+.salescard{padding:16px;display:flex;flex-direction:column;gap:12px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.84rem}
+.kv dt{color:var(--ink-3)}
+.kv dd{margin:0;font-weight:500}
+.hl{background:var(--gold-2);color:var(--gold-ink);border-radius:8px;padding:10px 12px;font-size:.84rem}
+.retailers{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+
+/* STUDIO */
+.studio{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+.controls{padding:16px;display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.field .lab{font-size:.78rem;font-weight:600;color:var(--ink-2)}
+select,textarea,.field input[type=text]{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);width:100%}
+textarea{resize:vertical;min-height:90px;font-size:.88rem}
+.igwrap{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:18px;align-items:start}
+.ig{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ig-h{display:flex;align-items:center;gap:8px;padding:10px 12px;font-size:.85rem;font-weight:600}
+.ig-h .avatar{width:28px;height:28px;font-size:.55rem}
+.ig-img{aspect-ratio:1/1;max-width:100%;position:relative;background:var(--surface-2)}
+.ig-img svg,.ig-img img{width:100%;height:100%;display:block;object-fit:cover}
+.ig-img .slide{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.7rem;padding:2px 8px;border-radius:999px}
+.ig-img .ovl{position:absolute;left:0;right:0;bottom:0;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff;font-family:var(--f-display);font-size:1.2rem;letter-spacing:.04em}
+.ig-dots{display:flex;justify-content:center;gap:4px;padding:8px}
+.ig-dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.ig-dots i.on{background:var(--peacock)}
+.ig-cap{padding:0 12px 14px;font-size:.86rem;white-space:pre-wrap}
+.ig-cap b{font-weight:600}
+.kw{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.kw span{font-size:.75rem;background:var(--peacock-2);color:var(--peacock);padding:2px 8px;border-radius:4px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cal div{background:var(--surface-2);border-radius:8px;padding:8px;min-height:84px;font-size:.74rem;display:flex;flex-direction:column;gap:4px}
+.cal div b{font-family:var(--f-mono);font-weight:500;color:var(--ink-3)}
+.cal .slot{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:3px 5px}
+.cal .slot.new{border-color:var(--peacock);color:var(--peacock);font-weight:600}
+.slides{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.slides button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 10px;font-size:.78rem}
+.slides button[aria-pressed="true"]{border-color:var(--peacock);color:var(--peacock);font-weight:600}
+
+/* PHOTO */
+.photo{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+.canvases{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cv{display:flex;flex-direction:column;gap:6px}
+.cv canvas{width:100%;max-width:100%;aspect-ratio:1/1;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);display:block}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:14px;text-align:center;font-size:.84rem;color:var(--ink-2);display:block;cursor:pointer}
+.drop:hover{border-color:var(--peacock)}
+.drop input{display:none}
+.bgs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.bgs button{border:2px solid transparent;border-radius:8px;padding:0;overflow:hidden;background:none}
+.bgs button[aria-pressed="true"]{border-color:var(--peacock)}
+.bgs canvas{width:100%;aspect-ratio:1/1;display:block}
+.bgs span{display:block;font-size:.68rem;padding:2px 0;color:var(--ink-2)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:.84rem;padding:12px 14px}
+.check .ok{color:var(--good);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--peacock)}
+
+/* CRM */
+.crm{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:18px;align-items:start}
+.queue{padding:6px 0}
+.qi{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 16px;border:0;background:none;width:100%;text-align:left;border-bottom:1px solid var(--line)}
+.qi:last-child{border-bottom:0}
+.qi[aria-pressed="true"]{background:var(--peacock-2)}
+.date{text-align:center;border:1px solid var(--line);border-radius:8px;padding:4px 0;background:var(--surface)}
+.date b{display:block;font-family:var(--f-mono);font-size:1rem;font-weight:500}
+.date span{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3)}
+.qi .t{font-weight:600;font-size:.9rem}
+.qi .d{font-size:.8rem;color:var(--ink-2)}
+.status{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.status.draft{background:var(--gold-2);color:var(--gold-ink)}
+.status.done{background:var(--peacock-2);color:var(--peacock)}
+.status.human{background:var(--surface-2);color:var(--ink-2)}
+.editor{padding:16px;display:flex;flex-direction:column;gap:12px}
+
+/* TREND */
+.trend{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;align-items:start}
+.chartbox{padding:16px;overflow-x:auto}
+.chartbox svg{display:block;width:100%;min-width:480px;height:auto}
+.chartbox text{fill:var(--ink-2);font-family:var(--f-body);font-size:12px}
+.chartbox .val{fill:var(--ink);font-family:var(--f-mono);font-size:11px}
+.chartbox .grid{stroke:var(--line);stroke-width:1}
+.chartbox .bar{fill:var(--peacock)}
+.chartbox .bar.top{fill:var(--gold)}
+.tt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tt-grid .pcard .pbody{padding:6px 8px}
+
+/* ROADMAP */
+.road{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.ritem{padding:16px;display:flex;flex-direction:column;gap:10px}
+.ritem .rn{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ritem p{font-size:.86rem;color:var(--ink-2)}
+.ritem .meta{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:.78rem}
+.ritem .meta dt{color:var(--ink-3)}
+.ritem .meta dd{margin:0}
+.ritem a{color:var(--peacock);font-weight:600;font-size:.84rem;text-decoration:none}
+.phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+.phase{padding:16px}
+.phase ul{margin:8px 0 0;padding-left:18px;font-size:.86rem;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
+.qs{margin-top:22px;padding:16px}
+.qs ol{margin:8px 0 0;padding-left:20px;font-size:.88rem;display:flex;flex-direction:column;gap:6px}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:.86rem;z-index:20;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+
+@media (max-width:1100px){
+  .flow{grid-template-columns:minmax(0,1fr) 320px}
+  .flow .salescard{grid-column:1/-1}
+}
+@media (max-width:900px){
+  .ask,.studio,.photo,.crm,.trend,.igwrap{grid-template-columns:minmax(0,1fr)}
+  .flow{grid-template-columns:minmax(0,1fr)}
+  .phone{height:520px;max-width:380px;width:100%;margin:0 auto}
+  .phases{grid-template-columns:minmax(0,1fr)}
+  .chat{min-height:520px}
+  .tag{display:none}
+}
+@media (max-width:560px){
+  .cal{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .tt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .canvases{grid-template-columns:1fr}
+  .rate{margin-left:0;width:100%}
+  .msg{max-width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brandrow">
+      <a class="mark" href="../index.html" style="text-decoration:none;color:inherit" title="Back to Touch22 home">TOUCH<b>22</b></a>
+      <div class="tag">AI Studio · a working demo of what we can automate</div><a class="btn small" href="../index.html" style="text-decoration:none;color:inherit">← Website</a>
+      <div class="rate"><label for="rate22">22KT rate ₹/g</label><input id="rate22" type="number" value="11800" step="10" min="1000"><span class="pill gold">example rate</span></div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Demo screens" id="tabs"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="note" id="dataNote"><span>ⓘ</span><span><strong>Demo data.</strong> Stock, retailers and orders are made up to show how it works. Product photos are free stock images from Unsplash standing in for Touch22's own shots. Add your real photos with <button class="btn small" id="addPhotosBtn" type="button">Add product photos</button> and they replace the stock photos across every screen (they stay in your browser).<input type="file" id="addPhotos" accept="image/*" multiple hidden></span></div>
+
+  <!-- 1 ASK -->
+  <section id="s-ask" class="screen" role="tabpanel">
+    <div class="screen-head" style="margin-top:18px">
+      <div>
+        <div class="eyebrow">For retailers · on WhatsApp and on touch22.in</div>
+        <h2>Ask Touch22</h2>
+        <p class="lede">A retailer types what they need in plain English or Hinglish. The assistant checks ready stock, filters by purity, weight and collection, prices it at today's rate, and builds a cart your sales team can close.</p>
+      </div>
+      <div class="who"><span class="pill">Answers from live stock</span><span class="pill">English · Hindi · Hinglish</span><span class="pill">Hands off to sales</span></div>
+    </div>
+    <div class="ask">
+      <div class="panel chat">
+        <div class="chat-head">
+          <div class="avatar">T22</div>
+          <div><div class="t">Touch22 Assistant</div><div class="s">Ready-stock help for trade buyers</div></div>
+          <span class="pill" id="aiMode"><span class="dot"></span>Connecting…</span>
+        </div>
+        <div class="log" id="log" aria-live="polite"></div>
+        <div class="composer">
+          <div class="chips" id="suggest"></div>
+          <form id="askForm"><input id="askInput" autocomplete="off" placeholder="e.g. 22KT bangles under 30 g in stock?"><button class="btn primary" type="submit" id="askBtn">Send</button></form>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3>Retailer cart</h3><span class="pill" id="cartCount">0 items</span></div>
+          <div id="cartLines"></div>
+          <div class="totals" id="cartTotals"></div>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <button class="btn primary" id="sendQuote" type="button" disabled>Request quote</button>
+            <button class="btn" id="clearCart" type="button">Clear</button>
+          </div>
+          <p class="src" style="margin-top:8px">Estimate = net wt × gold rate for the purity × (1 + making %) + stone charges, plus 3% GST. Touch22's real price rules plug in here.</p>
+        </div>
+        <div class="panel how">
+          <h3>What happens behind the chat</h3>
+          <ol>
+            <li>Reads the daily ready-stock upload and today's rate.</li>
+            <li>Understands the ask: category, purity, weight band, collection, budget.</li>
+            <li>Replies with real codes and stock only, never invented designs.</li>
+            <li>"Request quote" opens the follow-up flow for the sales team, with the full cart.</li>
+          </ol>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 2 FLOW -->
+  <section id="s-flow" class="screen" role="tabpanel" hidden>
+    <div class="screen-head" style="margin-top:18px">
+      <div>
+        <div class="eyebrow">For the sales team · replaces manual cart chasing</div>
+        <h2>Cart follow-up on autopilot</h2>
+        <p class="lede">Every cart on touch22.in starts a sequence: an instant WhatsApp acknowledgement, a reminder if it goes quiet, and a ready-made brief for the salesperson who closes it.</p>
+      </div>
+      <button class="btn primary" id="playFlow" type="button">▶ Play the sequence</button>
+    </div>
+    <div class="retailers" id="retailerPick"></div>
+    <div class="flow">
+      <div class="panel steps" id="steps"></div>
+      <div class="phone">
+        <div class="phone-top"><div class="avatar">T22</div><div><div style="font-weight:600" id="waName">Touch22 Gold</div><div style="font-size:.7rem;opacity:.8">WhatsApp Business · verified</div></div></div>
+        <div class="phone-log" id="waLog"></div>
+      </div>
+      <div class="panel salescard" id="salesCard"></div>
+    </div>
+  </section>
+
+  <!-- 3 CONTENT -->
+  <section id="s-content" class="screen" role="tabpanel" hidden>
+    <div class="screen-head" style="margin-top:18px">
+      <div>
+        <div class="eyebrow">For marketing · from the daily stock upload to Instagram</div>
+        <h2>Content studio</h2>
+        <p class="lede">Pick a design from today's stock and the studio drafts the post in Touch22's voice: premium, short, Hinglish where it fits, and no more than 8 keywords instead of a hashtag dump. Someone approves it before anything goes live.</p>
+      </div>
+    </div>
+    <div class="studio">
+      <div class="panel controls">
+        <div class="field"><label for="cProduct">Design</label><select id="cProduct"></select></div>
+        <div class="field"><span class="lab">Format</span><div class="chips" id="cFormat"></div></div>
+        <div class="field"><span class="lab">Language</span><div class="chips" id="cLang"></div></div>
+        <div class="field"><span class="lab">Angle</span><div class="chips" id="cAngle"></div></div>
+        <button class="btn primary" id="cGo" type="button">Draft the post</button>
+        <p class="src" id="cSrc"></p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+        <div class="igwrap">
+          <div class="ig">
+            <div class="ig-h"><div class="avatar">T22</div>touch22.in<span class="muted" style="font-weight:400;margin-left:auto;font-size:.75rem" id="igWhen"></span></div>
+            <div class="ig-img" id="igImg"></div>
+            <div class="ig-dots" id="igDots"></div>
+            <div class="ig-cap" id="igCap"></div>
+          </div>
+          <div class="panel" style="padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0">
+            <h3 id="cOutTitle">Draft</h3>
+            <div class="slides" id="cSlides"></div>
+            <div class="field"><label for="cText">Edit before approving</label><textarea id="cText" rows="9"></textarea></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="cApprove" type="button">Approve and schedule</button><button class="btn" id="cCopy" type="button">Copy text</button></div>
+          </div>
+        </div>
+        <div class="panel" style="padding:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h3>Posting week</h3><span class="src">Approved drafts land in the next open slot</span></div>
+          <div class="cal" id="cal"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 PHOTO -->
+  <section id="s-photo" class="screen" role="tabpanel" hidden>
+    <div class="screen-head" style="margin-top:18px">
+      <div>
+        <div class="eyebrow">For catalogue and Instagram · fixes the "AI changed my ring" problem</div>
+        <h2>Photo studio that keeps the design exact</h2>
+        <p class="lede">Generative tools redraw the jewellery and change the shape of rings and earrings. This studio cuts the real piece out of your photo and places it on a new backdrop with a soft shadow. The jewellery pixels are copied, never redrawn.</p>
+      </div>
+    </div>
+    <div class="photo">
+      <div class="panel controls">
+        <label class="drop" for="phFile">Drop or choose a product photo<br><span class="src">Best on a plain light background. Stays in your browser.</span><input type="file" id="phFile" accept="image/*"></label>
+        <div class="field"><label for="phSample">Or use a sample design</label><select id="phSample"></select></div>
+        <div class="field"><span class="lab">Backdrop</span><div class="bgs" id="bgs"></div></div>
+        <div class="field"><label for="phTol">Background removal strength</label><input type="range" id="phTol" min="5" max="120" value="48"></div>
+        <div class="field"><label for="phScale">Size on backdrop</label><input type="range" id="phScale" min="40" max="100" value="78"></div>
+        <button class="btn primary" id="phSave" type="button" hidden>Save image</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div class="canvases">
+          <div class="cv"><span class="eyebrow">Original</span><canvas id="cvIn" width="800" height="800"></canvas></div>
+          <div class="cv"><span class="eyebrow">Studio output</span><canvas id="cvOut" width="800" height="800"></canvas></div>
+        </div>
+        <div class="panel check" id="phCheck"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 CRM -->
+  <section id="s-crm" class="screen" role="tabpanel" hidden>
+    <div class="screen-head" style="margin-top:18px">
+      <div>
+        <div class="eyebrow">For relationships · the next 30 days</div>
+        <h2>Retailer care</h2>
+        <p class="lede">Birthdays, store anniversaries, festival wishes and reorder nudges, drafted from the client list and past orders. The team approves each one; condolence messages are always written by a person.</p>
+      </div>
+      <button class="btn" id="approveAll" type="button">Approve all routine drafts</button>
+    </div>
+    <div class="crm">
+      <div class="panel queue" id="queue"></div>
+      <div class="panel editor" id="editor"></div>
+    </div>
+  </section>
+
+  <!-- 6 TREND -->
+  <section id="s-trend" class="screen" role="tabpanel" hidden>
+    <div class="screen-head" style="margin-top:18px">
+      <div>
+        <div class="eyebrow">For Trending@Touch · computed, not hand-picked</div>
+        <h2>Trending@Touch, September 2026</h2>
+        <p class="lede">Each month the system ranks designs by orders and cart adds across all retailers, flags what is rising, and drafts the Trending@Touch section for the website and a post.</p>
+      </div>
+      <div class="chips" id="trendMode"></div>
+    </div>
+    <div class="trend">
+      <div class="panel chartbox" id="chart"></div>
+      <div class="panel" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+        <h3>Drafted section</h3>
+        <p class="muted" id="trendText" style="font-size:.9rem"></p>
+        <div class="tt-grid" id="ttGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 ROADMAP -->
+  <section id="s-road" class="screen" role="tabpanel" hidden>
+    <div class="screen-head" style="margin-top:18px">
+      <div>
+        <div class="eyebrow">The full plan</div>
+        <h2>Everything we can automate for Touch22</h2>
+        <p class="lede">Seven automations, ranked by how much time or revenue they win back. The first five are clickable in this demo.</p>
+      </div>
+    </div>
+    <div class="road" id="road"></div>
+    <div class="phases">
+      <div class="panel phase"><div class="eyebrow">Phase 1</div><h3>Sell faster</h3><ul><li>Ask Touch22 assistant on WhatsApp and the portal</li><li>Cart follow-up sequence</li><li>Daily rate and stock sync</li></ul></div>
+      <div class="panel phase"><div class="eyebrow">Phase 2</div><h3>Look better</h3><ul><li>Photo studio for catalogue and posts</li><li>Content studio and posting calendar</li><li>Trending@Touch from real data</li></ul></div>
+      <div class="panel phase"><div class="eyebrow">Phase 3</div><h3>Grow</h3><ul><li>Retailer care and reorder nudges</li><li>Export lead research and outreach drafts</li><li>HR and back-office trackers</li></ul></div>
+    </div>
+    <div class="panel qs"><h3>What we need from Touch22 to build it</h3><ol>
+      <li>Which platform runs touch22.in, and can it send cart and order events (webhook or daily export)?</li>
+      <li>Is WhatsApp Business API set up, and which number should the assistant use?</li>
+      <li>Which billing or stock software do you use (for example Omunim, Gati, Jewel Soft), and can it export stock daily?</li>
+      <li>Your pricing rules: making charges, wastage or touch, and stone charges by category.</li>
+      <li>Who approves Instagram posts and retailer messages today, and how many posts a week you want.</li>
+      <li>A folder of your original product photos (the same ones on Instagram) to load into the studio.</li>
+    </ol></div>
+  </section>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(()=>{
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inr=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+let toastT; function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600);}
+
+/* ---------- Sample catalogue ---------- */
+const FIN={22:.916,18:.75,9:.375};
+const P=[
+ ["T22-BG-104","Machine-cut kada pair","Core","bangle",22,28.4,28.4,"Plain",8,0,14,"bangle","y",true],
+ ["T22-BG-118","Rose gold slim bangles (set of 4)","Core","bangle",18,22.1,22.1,"Plain",10,0,6,"bangle","r",false],
+ ["T22-BG-131","ELIRA CZ eternity bangle","ELIRA","bangle",18,18.6,17.2,"CZ",14,3200,3,"bangle","y",true],
+ ["T22-BG-140","NAAZ Turkish broad kada","NAAZ","bangle",22,41.8,40.9,"Colour stones",13,4500,2,"bangle","y",false],
+ ["T22-RG-207","ELIRA solitaire-look CZ ring","ELIRA","ring",18,4.2,3.9,"CZ",15,1200,22,"ring","y",true],
+ ["T22-RG-212","NAVYA moissanite halo ring","NAVYA","ring",18,5.1,4.6,"Moissanite",16,9800,7,"ring","y",true],
+ ["T22-RG-219","Men's signet ring, matte","Men","ring",22,9.8,9.8,"Plain",9,0,11,"ring","y",false],
+ ["T22-RG-225","Couple bands, 9KT gifting pair","Gifting","bands",9,6.4,6.4,"Plain",12,0,30,"bands","r",true],
+ ["T22-RG-231","Mangalsutra ring, black bead","Core","ring",18,3.6,3.4,"Black beads",12,300,0,"ring","y",false],
+ ["T22-ER-305","ELIRA CZ drop earrings","ELIRA","earring",18,6.8,6.1,"CZ",15,1800,16,"drop","y",true],
+ ["T22-ER-311","NAVYA moissanite studs","NAVYA","earring",18,3.2,2.9,"Moissanite",16,7600,9,"stud","y",false],
+ ["T22-ER-318","Casting jhumka, temple motif","Core","earring",22,14.6,14.6,"Plain",11,0,5,"jhumka","y",true],
+ ["T22-ER-322","Rose gold ear cuff","Core","earring",18,2.4,2.4,"Plain",13,0,18,"cuff","r",true],
+ ["T22-ER-329","NAAZ Turkish chandbali","NAAZ","earring",22,19.2,18.4,"Colour stones",14,3800,2,"jhumka","y",false],
+ ["T22-MS-402","Short mangalsutra, CZ pendant","Core","mangalsutra",22,12.4,11.9,"CZ",11,900,10,"mangal","y",true],
+ ["T22-MS-409","NAVYA moissanite mangalsutra","NAVYA","mangalsutra",18,10.8,9.9,"Moissanite",16,14500,4,"mangal","y",false],
+ ["T22-MS-415","Long mangalsutra, plain vati","Core","mangalsutra",22,21.5,21.5,"Plain",9,0,6,"mangal","y",false],
+ ["T22-CH-503","Men's curb chain 22\"","Men","chain",22,24.6,24.6,"Plain",7,0,12,"chain","y",true],
+ ["T22-CH-508","Rope chain 18\"","Core","chain",22,11.2,11.2,"Plain",7,0,20,"chain","y",false],
+ ["T22-PD-604","ELIRA CZ floral pendant","ELIRA","pendant",18,3.9,3.5,"CZ",15,1100,14,"pendant","y",false],
+ ["T22-BR-702","Men's link bracelet","Men","bracelet",22,18.3,18.3,"Plain",8,0,8,"bracelet","y",true],
+ ["T22-BR-709","Rose gold CZ bracelet","ELIRA","bracelet",18,8.7,8.0,"CZ",14,2100,1,"bracelet","r",false],
+ ["T22-BR-714","Men's brooch, lapel","Men","pendant",22,7.4,7.1,"CZ",12,800,3,"brooch","y",false],
+ ["T22-BG-150","Lightweight daily bangles (pair)","Core","bangle",22,16.2,16.2,"Plain",9,0,25,"bangle","y",true],
+].map((r,i)=>({code:r[0],name:r[1],col:r[2],cat:r[3],kt:r[4],gw:r[5],nw:r[6],stone:r[7],mk:r[8],stoneCh:r[9],stock:r[10],art:r[11],metal:r[12],isNew:r[13],i}));
+const byCode=c=>P.find(p=>p.code.toLowerCase()===String(c).trim().toLowerCase());
+const rate22=()=>Math.max(1000,Number($("#rate22").value)||11800);
+const rateFor=kt=>rate22()/FIN[22]*FIN[kt];
+const price=p=>p.nw*rateFor(p.kt)*(1+p.mk/100)+p.stoneCh;
+const stockTag=p=>p.stock===0?'<span class="stock out">Made to order</span>':p.stock<=3?`<span class="stock low">Only ${p.stock} left</span>`:`<span class="stock ok">${p.stock} in stock</span>`;
+
+/* ---------- Illustrations (stand-ins for real photos) ---------- */
+const photos={}; // product index -> image URL (stock photo, or the user's own upload)
+const uploaded=new Set(); // product indexes whose photo came from the user (safe to cut out on a canvas)
+const STOCK={"T22-BG-104":"1758995116383-f51775896add","T22-BG-118":"1679156271456-d6068c543ee7","T22-BG-131":"1638617501607-5dfb8b079ebf","T22-BG-140":"1787769499046-8a94b2de1f62","T22-RG-207":"1611955167811-4711904bb9f8","T22-RG-212":"1631982686092-e6561a853187","T22-RG-219":"1598560917807-1bae44bd2be8","T22-RG-225":"1622398925373-3f91b1e275f5","T22-RG-231":"1655707063513-a08dad26440e","T22-ER-305":"1705326453273-1c35d7dad309","T22-ER-311":"1705326453282-e4e1b78f5fea","T22-ER-318":"1705326454933-9685fc6888e1","T22-ER-322":"1782400027260-3694aae56d1c","T22-ER-329":"1701777892770-df3bf8006fd8","T22-MS-402":"1651160670627-2896ddf7822f","T22-MS-409":"1758995115857-2de1eb6283d0","T22-MS-415":"1600862754152-80a263dd564f","T22-CH-503":"1611107683227-e9060eccd846","T22-CH-508":"1601121141461-920cb1993441","T22-PD-604":"1685970731571-72ede0cb26ea","T22-BR-702":"1633810542706-90e5ff7557be","T22-BR-709":"1611598935678-c88dca238fce","T22-BR-714":"1685970731194-e27b477e87ba","T22-BG-150":"1741071520904-37ef3c0fea09"};
+P.forEach(p=>{if(STOCK[p.code])photos[p.i]=`https://images.unsplash.com/photo-${STOCK[p.code]}?auto=format&fit=crop&w=600&h=600&q=75`;});
+const METAL={y:["#FFF1B8","#E8C25A","#B98A22","#7A5612"],r:["#FFE0D0","#E9A88A","#BF7558","#7E4632"]};
+function art(p,opt={}){
+  if(photos[p.i]&&!opt.svgOnly) return `<img src="${photos[p.i]}" alt="${esc(p.name)}" loading="lazy" decoding="async">`;
+  const id="g"+p.i+"_"+Math.random().toString(36).slice(2,7), m=METAL[p.metal]||METAL.y;
+  const stone=p.stone==="CZ"||p.stone==="Moissanite", colour=p.stone==="Colour stones", black=p.stone==="Black beads";
+  const bgA=p.col==="NAAZ"?"#3A1F2B":p.col==="NAVYA"?"#1E2A3A":p.col==="ELIRA"?"#E9ECEF":p.col==="Men"?"#24302E":"#F2EDE3";
+  const bgB=p.col==="NAAZ"?"#1C0E15":p.col==="NAVYA"?"#0F1621":p.col==="ELIRA"?"#C9D0D6":p.col==="Men"?"#121A19":"#DCD3C2";
+  const G=`url(#${id}m)`, S=`url(#${id}s)`;
+  const gem=(x,y,r)=>stone?`<circle cx="${x}" cy="${y}" r="${r}" fill="${S}" stroke="${m[2]}" stroke-width="1"/><circle cx="${x-r*.3}" cy="${y-r*.35}" r="${r*.28}" fill="#fff" opacity=".9"/>`:colour?`<circle cx="${x}" cy="${y}" r="${r}" fill="${["#B0263E","#1E7A55","#2A4FA8"][Math.round(x+y)%3]}" stroke="${m[2]}" stroke-width="1.2"/><circle cx="${x-r*.3}" cy="${y-r*.35}" r="${r*.25}" fill="#fff" opacity=".6"/>`:black?`<circle cx="${x}" cy="${y}" r="${r}" fill="#15171A"/>`:`<circle cx="${x}" cy="${y}" r="${r}" fill="${G}"/>`;
+  let g="";
+  switch(p.art){
+   case"ring":g=`<ellipse cx="100" cy="118" rx="46" ry="40" fill="none" stroke="${G}" stroke-width="11"/><ellipse cx="100" cy="118" rx="46" ry="40" fill="none" stroke="${m[0]}" stroke-width="2" opacity=".6"/>`+(p.stone==="Plain"?`<rect x="78" y="64" width="44" height="22" rx="8" fill="${G}" stroke="${m[3]}" stroke-width="1"/><path d="M86 75h28" stroke="${m[3]}" stroke-width="1.5" opacity=".5"/>`:`<path d="M80 82 L100 60 L120 82 Z" fill="${m[2]}"/>${gem(100,70,15)}${[[-22,4],[22,4]].map(([dx,dy])=>gem(100+dx,70+dy+8,5)).join("")}`);break;
+   case"bands":g=`<ellipse cx="80" cy="112" rx="38" ry="34" fill="none" stroke="${G}" stroke-width="10"/><ellipse cx="122" cy="104" rx="34" ry="30" fill="none" stroke="url(#${id}m2)" stroke-width="8"/><circle cx="122" cy="74" r="3.5" fill="#fff"/>`;break;
+   case"bangle":g=`<ellipse cx="100" cy="104" rx="66" ry="56" fill="none" stroke="${m[3]}" stroke-width="18" opacity=".35" transform="translate(4 6)"/><ellipse cx="100" cy="100" rx="66" ry="56" fill="none" stroke="${G}" stroke-width="16"/>`+Array.from({length:22},(_,k)=>{const a=k/22*Math.PI*2;return (stone||colour)&&k%2===0?gem(100+66*Math.cos(a),100+56*Math.sin(a),3.6):`<circle cx="${100+66*Math.cos(a)}" cy="${100+56*Math.sin(a)}" r="1.6" fill="${m[0]}" opacity=".9"/>`}).join("")+(p.name.includes("pair")||p.name.includes("set")?`<ellipse cx="100" cy="100" rx="52" ry="43" fill="none" stroke="url(#${id}m2)" stroke-width="7"/>`:"");break;
+   case"drop":case"stud":case"jhumka":case"cuff":{
+     const one=(cx)=>p.art==="stud"?`${gem(cx,96,13)}${[0,1,2,3,4,5].map(k=>{const a=k/6*Math.PI*2;return gem(cx+21*Math.cos(a),96+21*Math.sin(a),6)}).join("")}`
+       :p.art==="drop"?`<circle cx="${cx}" cy="56" r="7" fill="${G}"/><path d="M${cx} 63 L${cx} 82" stroke="${G}" stroke-width="3"/><path d="M${cx} 82 C ${cx+24} 110, ${cx+16} 146, ${cx} 150 C ${cx-16} 146, ${cx-24} 110, ${cx} 82Z" fill="${G}"/>${gem(cx,124,12)}${gem(cx,96,5)}`
+       :p.art==="jhumka"?`<circle cx="${cx}" cy="52" r="10" fill="${G}"/>${colour?gem(cx,52,5):""}<path d="M${cx} 62 v10" stroke="${G}" stroke-width="3"/><path d="M${cx-26} 120 Q ${cx-24} 74 ${cx} 72 Q ${cx+24} 74 ${cx+26} 120 Z" fill="${G}" stroke="${m[3]}" stroke-width="1"/>${[0,1,2,3,4,5,6].map(k=>`<circle cx="${cx-24+k*8}" cy="128" r="3.4" fill="${k%2&&colour?"#B0263E":m[1]}"/>`).join("")}`
+       :`<path d="M${cx-14} 60 C ${cx+34} 50, ${cx+40} 128, ${cx-2} 150" fill="none" stroke="${G}" stroke-width="9" stroke-linecap="round"/><circle cx="${cx-14}" cy="60" r="6" fill="${G}"/><path d="M${cx+20} 84 l10 -2" stroke="${G}" stroke-width="5" stroke-linecap="round"/>`;
+     g=p.art==="cuff"?one(100):one(66)+one(134);break;}
+   case"mangal":g=`<path d="M30 30 Q100 150 170 30" fill="none" stroke="#15171A" stroke-width="5" stroke-dasharray="1 7" stroke-linecap="round"/><path d="M30 30 Q100 150 170 30" fill="none" stroke="${G}" stroke-width="1.6"/>`+(p.name.includes("vati")?`<path d="M70 108 a14 14 0 1 0 28 0 a14 14 0 1 0 -28 0" fill="${G}"/><path d="M102 108 a14 14 0 1 0 28 0 a14 14 0 1 0 -28 0" fill="${G}"/>`:`<path d="M100 96 L120 122 L100 160 L80 122 Z" fill="${G}" stroke="${m[3]}" stroke-width="1"/>${gem(100,126,10)}`);break;
+   case"chain":g=Array.from({length:19},(_,k)=>{const t=k/18,x=30+140*t,y=30+150*t*(1-t)*1.6;return `<ellipse cx="${x}" cy="${y}" rx="${p.name.includes("curb")?8:6}" ry="${p.name.includes("curb")?5:4}" fill="none" stroke="${G}" stroke-width="${p.name.includes("curb")?3.5:2.6}" transform="rotate(${k*28} ${x} ${y})"/>`}).join("");break;
+   case"pendant":g=`<path d="M40 30 Q100 110 160 30" fill="none" stroke="${G}" stroke-width="2"/><circle cx="100" cy="72" r="5" fill="none" stroke="${G}" stroke-width="2"/>`+[0,1,2,3,4].map(k=>{const a=k/5*Math.PI*2-Math.PI/2;return `<ellipse cx="${100+18*Math.cos(a)}" cy="${112+18*Math.sin(a)}" rx="11" ry="7" fill="${G}" transform="rotate(${k*72} ${100+18*Math.cos(a)} ${112+18*Math.sin(a)})"/>`}).join("")+gem(100,112,8);break;
+   case"brooch":g=`<path d="M60 150 L140 60" stroke="${G}" stroke-width="4"/>`+[0,1,2,3,4,5,6,7].map(k=>{const a=k/8*Math.PI*2;return `<path d="M100 100 L${100+40*Math.cos(a)} ${100+40*Math.sin(a)}" stroke="${G}" stroke-width="6" stroke-linecap="round"/>`}).join("")+gem(100,100,12);break;
+   case"bracelet":g=Array.from({length:11},(_,k)=>{const a=Math.PI*(.1+k*.08),x=100+70*Math.cos(a),y=40+90*Math.sin(a);return `<rect x="${x-9}" y="${y-6}" width="18" height="12" rx="5" fill="none" stroke="${G}" stroke-width="3.4" transform="rotate(${k*14-70} ${x} ${y})"/>${stone&&k%2?gem(x,y,3.5):""}`}).join("");break;
+  }
+  return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of ${esc(p.name)}"><defs><radialGradient id="${id}b" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="${bgA}"/><stop offset="1" stop-color="${bgB}"/></radialGradient><linearGradient id="${id}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${m[0]}"/><stop offset=".35" stop-color="${m[1]}"/><stop offset=".7" stop-color="${m[2]}"/><stop offset="1" stop-color="${m[1]}"/></linearGradient><linearGradient id="${id}m2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${m[0]}"/><stop offset=".5" stop-color="${m[2]}"/><stop offset="1" stop-color="${m[1]}"/></linearGradient><radialGradient id="${id}s" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="${p.stone==="Moissanite"?"#E4ECFF":"#EEF3F7"}"/><stop offset="1" stop-color="#A9B6C2"/></radialGradient></defs>${opt.noBg?"":`<rect width="200" height="200" fill="url(#${id}b)"/>`}<g>${g}</g></svg>`;
+}
+const imgBox=(p,cls="pimg")=>`<div class="${cls}">${art(p)}${cls==="pimg"&&!photos[p.i]?'<span class="lbl">ILLUSTRATION</span>':""}</div>`;
+function pcard(p,{add=true}={}){
+  return `<div class="pcard">${imgBox(p)}<div class="pbody"><div class="pcode">${p.code} · ${p.kt}KT</div><div class="pname">${esc(p.name)}</div><div class="pmeta">${p.gw} g gross · ${p.nw} g net</div><div class="pmeta">${inr(price(p))} est.</div><div class="pfoot">${stockTag(p)}${add?`<button class="btn small" data-add="${p.code}" type="button">Add</button>`:""}</div></div></div>`;
+}
+
+/* ---------- Tabs ---------- */
+const TABS=[["ask","Ask Touch22"],["flow","Cart follow-up"],["content","Content studio"],["photo","Photo studio"],["crm","Retailer care"],["trend","Trending@Touch"],["road","Full plan"]];
+$("#tabs").innerHTML=TABS.map(([k,l],i)=>`<button class="tab" role="tab" id="t-${k}" aria-controls="s-${k}" aria-selected="${i===0}" data-tab="${k}"><span class="n">0${i+1}</span>${l}</button>`).join("");
+const opened=new Set();
+function show(k){
+  $$(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===k));
+  $$(".screen").forEach(s=>s.hidden=s.id!=="s-"+k);
+  if(k==="photo"&&!opened.has("photo")){initPhoto();}
+  if(k==="trend")drawTrend();
+  opened.add(k);
+  try{localStorage.setItem("t22tab",k)}catch(e){}
+  if(location.hash!=="#"+k)history.replaceState(null,"","#"+k);
+  window.scrollTo({top:0});
+}
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)show(b.dataset.tab);});
+document.addEventListener("click",e=>{const a=e.target.closest("[data-goto]");if(a){e.preventDefault();show(a.dataset.goto);}});
+
+/* ---------- Photos upload (global) ---------- */
+$("#addPhotosBtn").onclick=()=>$("#addPhotos").click();
+$("#addPhotos").onchange=e=>{
+  const files=[...e.target.files]; if(!files.length)return;
+  files.slice(0,P.length).forEach((f,k)=>{photos[k]=URL.createObjectURL(f);uploaded.add(k);});
+  toast(`${Math.min(files.length,P.length)} photo${files.length>1?"s":""} placed on designs in catalogue order`);
+  rerenderAll();
+};
+
+/* ---------- 1. ASK ---------- */
+let sample=null, live=false; const turns=[]; const cart=new Map();
+const SUGGEST=["22KT bangles under 30 g in ready stock?","Bridal ELIRA CZ earrings dikhao","Price for 3 pcs T22-RG-212 at today's rate","Men's collection for a showroom display","Kuch naye mangalsutra designs hai?","What's trending this month?"];
+$("#suggest").innerHTML=SUGGEST.map(s=>`<button class="chip" type="button">${esc(s)}</button>`).join("");
+$("#suggest").addEventListener("click",e=>{const b=e.target.closest(".chip");if(b)ask(b.textContent);});
+function setMode(){const m=$("#aiMode");m.className="pill"+(live?" live":"");m.innerHTML=`<span class="dot"></span>${live?"Live AI":"Demo replies"}`;m.title=live?"Answers come from Claude, using the stock list on this page":"Scripted replies built from the stock list on this page. Live AI is used when this page is opened in Claude.";}
+(async()=>{try{sample=window.claude?await window.claude.use("sample"):null;}catch(e){sample=null}live=!!sample;setMode();})();
+
+function md(s){
+  const lines=esc(s).split("\n"); let out="",inList=false;
+  for(const l of lines){const b=l.match(/^\s*[-•*]\s+(.*)/);if(b){if(!inList){out+="<ul>";inList=true}out+=`<li>${b[1]}</li>`;continue}if(inList){out+="</ul>";inList=false}out+=l+"\n";}
+  if(inList)out+="</ul>";
+  return out.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n+$/,"");
+}
+function addMsg(role,html,extra=""){
+  const d=document.createElement("div");d.className="msg "+(role==="user"?"me":"bot");
+  d.innerHTML=`<div class="bubble">${html}</div>${extra}`;$("#log").append(d);$("#log").scrollTop=1e9;return d;
+}
+function welcome(){
+  addMsg("bot",md("Namaste! I'm the Touch22 assistant. Ask me about ready stock, weights, purities (T-22, T-18, T-9), collections like **ELIRA**, **NAVYA** and **NAAZ**, or a price at today's rate. I can also put designs in your cart for our sales team."),`<div class="cards">${["T22-BG-150","T22-RG-207","T22-ER-305"].map(c=>pcard(byCode(c))).join("")}</div>`);
+}
+function catalogText(){
+  return P.map(p=>`${p.code} | ${p.name} | ${p.col} | ${p.cat} | ${p.kt}KT | gross ${p.gw}g net ${p.nw}g | ${p.stone} | making ${p.mk}% | stone ₹${p.stoneCh} | stock ${p.stock}${p.isNew?" | NEW":""} | est ₹${Math.round(price(p))}`).join("\n");
+}
+function rules(){
+  return `You are the Touch22 trade assistant. Touch22 (Unitouch Creations LLP, Zaveri Bazaar, Mumbai) is a B2B gold jewellery wholesaler selling to jewellery retailers, not consumers. Brand voice: premium, warm, concise. Today is 18 Oct 2026. Example 22KT rate: ₹${rate22()}/g (18KT ₹${Math.round(rateFor(18))}/g, 9KT ₹${Math.round(rateFor(9))}/g).
+Price estimate per piece = net weight × rate for its purity × (1 + making%) + stone charge; add 3% GST on totals. Say it is an estimate and the sales team confirms the final quote.
+Rules: Use ONLY the stock list below. Never invent designs, codes, weights or stock. If nothing fits, say so and offer the closest options or "made to order". Stock 0 means made to order. Reply in the customer's language: English, Hindi or Hinglish (Roman script) to match them. Keep replies under 90 words; short bullets are fine; use **bold** sparingly. Do not use emoji.
+After your reply, on its own last line, write SKUS: followed by up to 4 product codes to show as cards, comma separated, or SKUS: none.
+Trending last month (by orders + cart adds): T22-BG-150, T22-RG-207, T22-ER-322, T22-MS-402, T22-CH-503.
+STOCK LIST (code | name | collection | category | purity | weights | stones | making | stone charge | stock | estimate):
+${catalogText()}`;
+}
+function extractSkus(text){
+  const m=text.match(/\n?\s*SKUS?:\s*([^\n]*)\s*$/i); let codes=[];let body=text;
+  if(m){body=text.slice(0,m.index).trim();codes=m[1].split(/[,\s]+/).map(byCode).filter(Boolean);}
+  else{codes=[...new Set((text.match(/T22-[A-Z]{2}-\d{3}/gi)||[]))].map(byCode).filter(Boolean);}
+  return {body:body.replace(/\s*SKUS?:\s*$/i,""),codes:codes.slice(0,4)};
+}
+let busy=false;
+async function ask(q){
+  q=q.trim(); if(!q||busy)return; busy=true; $("#askBtn").disabled=true; $("#askInput").value="";
+  addMsg("user",esc(q)); turns.push({role:"user",content:q});
+  const m=addMsg("bot",'<span class="typing"><i></i><i></i><i></i></span>'); const bub=m.querySelector(".bubble");
+  let answer=null, source="demo";
+  if(live&&sample){
+    try{
+      const hist=turns.slice(-8);
+      const r=await sample([{role:"user",content:rules()},{role:"assistant",content:"Understood. I'll answer from the stock list only."},...hist],{modelTier:"quick",cache:false,onText:({text})=>{bub.innerHTML=md(extractSkus(text).body)||'<span class="typing"><i></i><i></i><i></i></span>';$("#log").scrollTop=1e9;}});
+      answer=r.text; source="live";
+    }catch(e){
+      if(["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(e.code)){live=false;setMode();}
+      answer=null;
+    }
+  }
+  if(answer===null){await new Promise(r=>setTimeout(r,550)); answer=localAnswer(q);}
+  const {body,codes}=extractSkus(answer);
+  bub.innerHTML=md(body);
+  if(codes.length){m.insertAdjacentHTML("beforeend",`<div class="cards">${codes.map(p=>pcard(p)).join("")}</div>`);}
+  m.insertAdjacentHTML("beforeend",`<span class="src">${source==="live"?"Live AI answer from the stock list":"Demo reply from the stock list"}</span>`);
+  turns.push({role:"assistant",content:answer});
+  $("#log").scrollTop=1e9; busy=false; $("#askBtn").disabled=false;
+}
+$("#askForm").addEventListener("submit",e=>{e.preventDefault();ask($("#askInput").value);});
+
+function localAnswer(q){
+  const s=q.toLowerCase(); const hi=/\b(dikhao|dikha|chahiye|hai|kya|naye|naya|kitna|kitne|bhai|ji|wala|wale|kuch|batao|mein|ka|ki)\b/.test(s);
+  const code=s.match(/t22-[a-z]{2}-\d{3}/i);
+  if(code){const p=byCode(code[0]); if(p){const qty=Number((s.match(/(\d+)\s*(pcs|pc|pieces|nos|piece)/)||[])[1])||1;const each=price(p),tot=each*qty*1.03;
+    return (hi?`**${p.code}** ${p.name}: ${p.kt}KT, net ${p.nw} g.\n- Ek piece: ${inr(each)} (aaj ke rate pe)\n- ${qty} pcs + 3% GST: **${inr(tot)}**\n- Stock: ${p.stock?p.stock+" pcs ready":"made to order"}\nFinal quote hamari sales team confirm karegi.`:`**${p.code}** ${p.name}: ${p.kt}KT, net ${p.nw} g, making ${p.mk}%${p.stoneCh?`, stones ${inr(p.stoneCh)}`:""}.\n- Per piece: ${inr(each)} at today's rate\n- ${qty} pcs incl. 3% GST: **${inr(tot)}**\n- Stock: ${p.stock?p.stock+" ready":"made to order"}${p.stock&&p.stock<qty?` (only ${p.stock} ready, rest made to order)`:""}\nThis is an estimate; the sales team confirms the final quote.`)+`\nSKUS: ${p.code}`;}}
+  if(/trend|best ?sell|popular|chal raha/.test(s)) return (hi?"Pichle mahine ke top designs, orders aur cart adds ke hisaab se:":"Top designs last month by orders and cart adds across retailers:")+"\n- Lightweight daily bangles (T22-BG-150)\n- ELIRA solitaire-look CZ ring (T22-RG-207)\n- Rose gold ear cuff (T22-ER-322)\n- Short CZ mangalsutra (T22-MS-402)\nSKUS: T22-BG-150, T22-RG-207, T22-ER-322, T22-MS-402";
+  const CAT={bangle:/bangle|kada|kangan|chud/,ring:/\bring|anguthi|\bband/,earring:/earring|jhumka|stud|bali|cuff|chandbali|tops/,mangalsutra:/mangalsutra|mangal/,chain:/chain/,pendant:/pendant|brooch|locket/,bracelet:/bracelet/};
+  let r=P.slice(); const why=[];
+  const cats=Object.keys(CAT).filter(k=>CAT[k].test(s));
+  if(cats.length){r=r.filter(p=>cats.includes(p.cat)||(cats.includes("ring")&&p.cat==="bands")); why.push(cats.join(" / "));}
+  if(/\bmen|gents|male|purush/.test(s)){r=r.filter(p=>p.col==="Men");why.push("men's");}
+  for(const c of ["elira","navya","naaz"]) if(s.includes(c)){r=r.filter(p=>p.col.toLowerCase()===c);why.push(c.toUpperCase());}
+  if(/turkish/.test(s)){r=r.filter(p=>p.col==="NAAZ");why.push("Turkish");}
+  if(/gift|couple/.test(s)){r=r.filter(p=>p.col==="Gifting"||p.kt===9);why.push("gifting");}
+  const kt=s.match(/\b(22|18|9)\s*(kt|k|karat|carat)\b|t-?(22|18|9)\b/); if(kt){const k=Number(kt[1]||kt[3]);r=r.filter(p=>p.kt===k);why.push(k+"KT");}
+  if(/\bcz\b/.test(s)){r=r.filter(p=>p.stone==="CZ");why.push("CZ");}
+  if(/moissan/.test(s)){r=r.filter(p=>p.stone==="Moissanite");why.push("moissanite");}
+  if(/plain/.test(s)){r=r.filter(p=>p.stone==="Plain");why.push("plain gold");}
+  if(/rose/.test(s)){r=r.filter(p=>p.metal==="r");why.push("rose gold");}
+  const under=s.match(/(?:under|below|less than|upto|up to|max)\s*(\d+(?:\.\d+)?)\s*(?:g|gm|gms|gram)/)||s.match(/(\d+(?:\.\d+)?)\s*(?:g|gm|gms|grams?)\s*(?:se kam|ke andar|under|tak)/);
+  if(under){const g=Number(under[1]);r=r.filter(p=>p.gw<=g);why.push(`under ${g} g`);}
+  if(/naye|naya|new|latest/.test(s)){const n=r.filter(p=>p.isNew);if(n.length){r=n;why.push("new");}}
+  if(/stock|ready/.test(s)){r=r.filter(p=>p.stock>0);why.push("in stock");}
+  if(/bridal|shaadi|wedding/.test(s))why.push("bridal");
+  if(!why.length) return hi?"Main stock, weight, purity, collection ya aaj ke rate pe price bata sakta hoon. Jaise: \"18KT CZ rings 5 g se kam\" ya \"T22-BG-104 ka rate\".\nSKUS: none":"I can help with ready stock, weights, purities, collections and prices at today's rate. Try \"18KT CZ rings under 5 g\" or \"price for 2 pcs T22-BG-104\".\nSKUS: none";
+  if(!r.length) return (hi?`${why.join(", ")} mein abhi ready stock nahi hai. Hum made to order kar sakte hain, ya ye close options dekhiye:`:`Nothing in ready stock matches ${why.join(", ")}. We can make to order, or here are the closest options:`)+`\nSKUS: ${P.filter(p=>cats.includes(p.cat)).slice(0,3).map(p=>p.code).join(", ")||"T22-BG-150, T22-RG-207"}`;
+  r.sort((a,b)=>(b.stock>0)-(a.stock>0)||b.isNew-a.isNew||a.gw-b.gw);
+  const top=r.slice(0,4); const inStock=r.filter(p=>p.stock>0).length;
+  const lines=top.map(p=>`- **${p.code}** ${p.name}, ${p.kt}KT, ${p.gw} g, ${p.stock?p.stock+(hi?" ready":" in stock"):"made to order"}`).join("\n");
+  return (hi?`${why.join(", ")}: ${r.length} design mile, ${inStock} ready stock mein.`:`${r.length} design${r.length>1?"s match":" matches"} ${why.join(", ")}; ${inStock} in ready stock.`)+`\n${lines}\n`+(hi?"Cart mein add karein, sales team aaj hi confirm karegi.":"Add any to your cart and our sales team confirms today.")+`\nSKUS: ${top.map(p=>p.code).join(", ")}`;
+}
+
+function renderCart(){
+  const lines=[...cart.entries()].map(([c,q])=>({p:byCode(c),q}));
+  $("#cartCount").textContent=`${lines.reduce((a,l)=>a+l.q,0)} item${lines.length===1&&lines[0].q===1?"":"s"}`;
+  $("#cartLines").innerHTML=lines.length?lines.map(({p,q})=>`<div class="cartline"><div class="thumb">${art(p)}</div><div style="min-width:0"><div class="pname" style="font-size:.82rem">${esc(p.name)}</div><div class="pmeta">${p.code} · ${(p.gw*q).toFixed(1)} g</div></div><div class="qty"><button type="button" data-q="${p.code}" data-d="-1" aria-label="Fewer">−</button><span class="mono">${q}</span><button type="button" data-q="${p.code}" data-d="1" aria-label="More">+</button></div></div>`).join(""):'<p class="empty">Add designs from the chat to build a cart.</p>';
+  const gw=lines.reduce((a,l)=>a+l.p.gw*l.q,0), val=lines.reduce((a,l)=>a+price(l.p)*l.q,0);
+  $("#cartTotals").innerHTML=lines.length?`<span class="muted">Gross weight</span><span class="mono">${gw.toFixed(2)} g</span><span class="muted">Estimate</span><span class="mono">${inr(val)}</span><span class="muted">GST 3%</span><span class="mono">${inr(val*.03)}</span><span class="big">Total</span><span class="mono big">${inr(val*1.03)}</span>`:"";
+  $("#sendQuote").disabled=!lines.length;
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-add]"); if(a){const c=a.dataset.add;cart.set(c,(cart.get(c)||0)+1);renderCart();toast(`${byCode(c).name} added to cart`);}
+  const q=e.target.closest("[data-q]"); if(q){const c=q.dataset.q,n=(cart.get(c)||0)+Number(q.dataset.d);n>0?cart.set(c,n):cart.delete(c);renderCart();}
+});
+$("#clearCart").onclick=()=>{cart.clear();renderCart();};
+$("#sendQuote").onclick=()=>{
+  RET[0].cart=[...cart.entries()]; curRet=0; renderRetPick(); resetFlow(); show("flow"); playFlow();
+};
+
+/* ---------- 2. FLOW ---------- */
+const RET=[
+ {name:"Shree Laxmi Jewellers",city:"Pune",contact:"Mahesh bhai",since:"2017",tier:"Gold partner",last:"12 Sep 2026 · 186.4 g · machine bangles, CZ rings",avg:"Every 4 to 5 weeks",likes:"Lightweight 22KT bangles, ELIRA rings",credit:"Clear",cart:[["T22-BG-150",4],["T22-RG-207",6],["T22-ER-305",3]],sales:"Ritika (new BD hire)",you:true},
+ {name:"Kalyan Gold House",city:"Nashik",contact:"Pradeep ji",since:"2014",tier:"Platinum partner",last:"02 Sep 2026 · 412.0 g · mangalsutras, kadas",avg:"Every 4 weeks (now 46 days)",likes:"Long mangalsutras, NAAZ kadas",credit:"₹1.8 L due 30 Oct",cart:[["T22-MS-415",3],["T22-BG-140",2],["T22-MS-402",4]],sales:"Sanchit"},
+ {name:"Patel Ornaments",city:"Surat",contact:"Hetal ben",since:"2021",tier:"Silver partner",last:"28 Aug 2026 · 74.2 g · ear cuffs, couple bands",avg:"Every 6 weeks",likes:"Rose gold, 9KT gifting",credit:"Clear",cart:[["T22-ER-322",10],["T22-RG-225",8]],sales:"Ritika (new BD hire)"},
+];
+let curRet=0, flowStep=-1, flowTimer=null;
+function renderRetPick(){
+  $("#retailerPick").innerHTML=RET.map((r,i)=>`<button class="chip" type="button" data-ret="${i}" aria-pressed="${i===curRet}">${esc(r.name)}, ${r.city}${r.you&&cart.size?" (your cart)":""}</button>`).join("");
+}
+$("#retailerPick").addEventListener("click",e=>{const b=e.target.closest("[data-ret]");if(b){curRet=+b.dataset.ret;renderRetPick();resetFlow();}});
+function flowData(){
+  const r=RET[curRet]; const lines=r.cart.map(([c,q])=>({p:byCode(c),q}));
+  const gw=lines.reduce((a,l)=>a+l.p.gw*l.q,0), val=lines.reduce((a,l)=>a+price(l.p)*l.q,0)*1.03;
+  const short=lines.filter(l=>l.p.stock<l.q);
+  const list=lines.map(l=>`• ${l.p.code} ${l.p.name} × ${l.q}`).join("\n");
+  return {r,lines,gw,val,short,steps:[
+    {tm:"0 min",tt:"Cart created on touch22.in",dd:`${lines.length} designs, ${gw.toFixed(1)} g gross`,wa:null},
+    {tm:"+1 min",tt:"Instant WhatsApp acknowledgement",dd:"Sent automatically with stock check",wa:{out:true,t:`Namaste ${r.contact}, thank you for your cart at Touch22.\n\n${list}\n\nGross ${gw.toFixed(1)} g · estimate ${inr(val)} incl. GST at today's rate.${short.length?`\n\n${short.map(l=>`${l.p.code}: ${l.p.stock} ready, rest made to order`).join("\n")}`:"\n\nAll pieces are in ready stock."}`,btns:["Confirm order","Change items","Call me"]}},
+    {tm:"+1 min",tt:"Sales team alerted",dd:`${r.sales} gets the brief on the right`,wa:null},
+    {tm:"+4 hrs",tt:"No reply: gentle reminder",dd:"Only if the cart is still open",wa:{out:true,t:`${r.contact}, a quick note: ${lines[0].p.name} (${lines[0].p.code}) is one of this month's bestsellers and stock moves fast. Shall we keep your pieces aside today?`,btns:["Yes, keep aside","Later"]}},
+    {tm:"+4 hrs",tt:"Retailer replies",dd:"The assistant answers what it can",wa:{out:false,t:"Haan rakh do. Bangles ka weight thoda kam mil sakta hai?"}},
+    {tm:"+4 hrs",tt:"Handed to a person",dd:"Weight changes need a salesperson",wa:{out:true,t:`Ji zaroor. ${r.sales.split(" ")[0]} from our team will call you within the hour with lighter options. Your pieces are on hold till 7 pm.`}},
+    {tm:"Next day",tt:"Closed: order confirmed",dd:"Outcome logged to the retailer's history",wa:{out:true,t:"Order confirmed. Thank you, see you at the next exhibition. 🙏",btns:[]}},
+  ]};
+}
+function resetFlow(){clearInterval(flowTimer);flowStep=-1;renderFlow();}
+function renderFlow(){
+  const d=flowData();
+  $("#steps").innerHTML=d.steps.map((s,i)=>`<button class="step ${i<=flowStep?"on":""} ${i===flowStep?"cur":""}" type="button" data-step="${i}"><span class="tm">${s.tm}</span><span class="ic">${i<=flowStep?"✓":i+1}</span><span><div class="tt">${s.tt}</div><div class="dd">${s.dd}</div></span></button>`).join("");
+  $("#waName").textContent=`Chat with ${d.r.name}`;
+  const was=d.steps.slice(0,flowStep+1).filter(s=>s.wa);
+  $("#waLog").innerHTML=was.length?was.map((s,k)=>`<div class="wa ${s.wa.out?"out":""}">${esc(s.wa.t)}${s.wa.btns&&s.wa.btns.length?`<div class="btns">${s.wa.btns.map(b=>`<span>${b}</span>`).join("")}</div>`:""}<span class="when">${s.tm}${s.wa.out?" · auto":""}</span></div>`).join(""):'<div class="wa" style="align-self:center;text-align:center;opacity:.7">Press Play to watch the conversation</div>';
+  $("#waLog").scrollTop=1e9;
+  const r=d.r;
+  $("#salesCard").innerHTML=`<div class="eyebrow">Brief for ${esc(r.sales)}</div><h3>${esc(r.name)}, ${r.city}</h3>
+   <dl class="kv"><dt>Contact</dt><dd>${esc(r.contact)}</dd><dt>Partner since</dt><dd>${r.since} · ${r.tier}</dd><dt>Last order</dt><dd>${r.last}</dd><dt>Reorder cycle</dt><dd>${r.avg}</dd><dt>Usually buys</dt><dd>${r.likes}</dd><dt>Credit</dt><dd>${r.credit}</dd></dl>
+   <div><div class="eyebrow" style="margin-bottom:6px">This cart</div>${d.lines.map(l=>`<div class="cartline"><div class="thumb">${art(l.p)}</div><div style="min-width:0"><div class="pname" style="font-size:.82rem">${esc(l.p.name)}</div><div class="pmeta">${l.p.code} · ×${l.q} · ${stockTag(l.p)}</div></div><div class="mono" style="font-size:.8rem">${inr(price(l.p)*l.q)}</div></div>`).join("")}</div>
+   <div class="totals"><span class="muted">Gross</span><span class="mono">${d.gw.toFixed(1)} g</span><span class="big">Est. incl. GST</span><span class="mono big">${inr(d.val)}</span></div>
+   <div class="hl"><b>Suggested next step:</b> ${d.short.length?`offer made-to-order dates for ${d.short.map(l=>l.p.code).join(", ")}, then`:""} ${/due/.test(r.credit)?"mention the payment due 30 Oct before confirming. ":""}Suggest ${r.likes.split(",")[0].toLowerCase()} to round out the order.</div>`;
+}
+$("#steps").addEventListener("click",e=>{const b=e.target.closest("[data-step]");if(b){clearInterval(flowTimer);flowStep=+b.dataset.step;renderFlow();}});
+function playFlow(){
+  clearInterval(flowTimer); const n=flowData().steps.length;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){flowStep=n-1;renderFlow();return;}
+  flowStep=0;renderFlow();
+  flowTimer=setInterval(()=>{flowStep++;renderFlow();if(flowStep>=n-1)clearInterval(flowTimer);},1300);
+}
+$("#playFlow").onclick=playFlow;
+
+/* ---------- 3. CONTENT ---------- */
+const FORMATS=["Carousel","Reel script","Single post"], LANGS=["English","Hinglish"], ANGLES=["New arrival","Explainer","Festive (Dhanteras)","Trade buyers"];
+let cFmt="Carousel",cLang="Hinglish",cAngle="New arrival", draft=null, slideIx=0;
+const chipRow=(el,arr,cur,fn)=>{el.innerHTML=arr.map(a=>`<button class="chip" type="button" aria-pressed="${a===cur}">${a}</button>`).join("");el.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;fn(b.textContent);chipRow(el,arr,b.textContent,fn);};};
+chipRow($("#cFormat"),FORMATS,cFmt,v=>cFmt=v);chipRow($("#cLang"),LANGS,cLang,v=>cLang=v);chipRow($("#cAngle"),ANGLES,cAngle,v=>cAngle=v);
+$("#cProduct").innerHTML=P.map(p=>`<option value="${p.code}">${p.code} · ${esc(p.name)}</option>`).join("");
+$("#cProduct").value="T22-ER-305";
+const sched=[{d:0,t:"Reel · Exhibition recap"},{d:2,t:"Carousel · What is CZ?"},{d:4,t:"Post · Men's chains"}];
+function kwFor(p){
+  const k=[`${p.kt}KT gold ${p.cat==="bands"?"couple bands":p.cat}`,`${p.stone==="Plain"?"plain gold":p.stone+" jewellery"}`,"B2B gold jewellery","gold jewellery wholesaler Mumbai","Zaveri Bazaar"];
+  if(p.col!=="Core"&&p.col!=="Men"&&p.col!=="Gifting")k.unshift(`${p.col} collection`);
+  if(p.col==="Men")k.unshift("men's gold jewellery");
+  if(p.metal==="r")k.push("rose gold");
+  if(cAngle.startsWith("Festive"))k.push("Dhanteras collection");
+  return [...new Set(k)].slice(0,8);
+}
+function templateDraft(p){
+  const H=cLang==="Hinglish", kw=kwFor(p);
+  const hook={"New arrival":H?`Naya in-store: ${p.name}.`:`Just in: ${p.name}.`,"Explainer":H?`${p.stone==="Plain"?p.kt+"KT":p.stone} kya hai, aur retailers ise kyun pasand karte hain?`:`What makes ${p.stone==="Plain"?p.kt+"KT plain gold":p.stone} worth stocking?`,"Festive (Dhanteras)":H?`Dhanteras ki tayyari? ${p.name} ready stock mein.`:`Dhanteras is three weeks away. ${p.name}, in ready stock.`,"Trade buyers":H?`Retailers, ye design aapke counter pe chalega.`:`For your counter: ${p.name}.`}[cAngle];
+  const spec=`${p.kt}KT · ${p.gw} g · ${p.stone}`;
+  const cap=`${hook}\n\n${spec}. ${H?"Lightweight, clean finish, aur har din pehenne layak.":"Lightweight, clean finish, made to sell every day."}\n\n${H?"Ready stock ke liye DM karein ya touch22.in pe order karein.":"DM for ready stock or order on touch22.in."}\n\nA Different Gold Experience.`;
+  const slides=cFmt==="Carousel"?[hook,`${spec}`,H?"Close-up: finish aur detailing":"Close-up: the finish and detail",H?`Stock: ${p.stock?p.stock+" pcs ready":"made to order"}`:`Stock: ${p.stock?p.stock+" pieces ready":"made to order"}`,H?"Order karein: touch22.in":"Order on touch22.in"]
+   :cFmt==="Reel script"?[`0–2s · ${H?"Hook":"Hook"}: "${hook}"`,`2–6s · ${H?"Slow turn, close-up on":"Slow turn, close-up on"} ${p.stone==="Plain"?"the finish":"the stones"}`,`6–10s · ${H?"Haath pe styling, natural light":"On hand, natural light"}`,`10–13s · Text: ${spec}`,`13–15s · ${H?"End card: touch22.in pe order karein":"End card: order on touch22.in"}`]
+   :[hook];
+  return {caption:cap,slides,kw};
+}
+async function makeDraft(){
+  const p=byCode($("#cProduct").value); $("#cGo").disabled=true; $("#cGo").textContent="Drafting…";
+  let d=null, src="Template draft";
+  if(live&&sample){
+    try{
+      const j=await sample.json(`Write an Instagram ${cFmt.toLowerCase()} for Touch22 (@touch22.in), a Mumbai B2B gold jewellery wholesaler. Tagline "A Different Gold Experience". Voice: premium, warm, concise; short sentences; no emoji; no hashtags. Language: ${cLang==="Hinglish"?"Hinglish (Hindi in Roman script mixed with English)":"English"}. Angle: ${cAngle}. Audience: jewellery retailers and also end customers. Today is 18 Oct 2026, Dhanteras is 6 Nov 2026.
+Product: ${p.name}, code ${p.code}, ${p.kt}KT, gross ${p.gw} g, ${p.stone}, collection ${p.col}, stock ${p.stock}.
+Reply with only JSON: {"caption": string under 70 words, "slides": array of ${cFmt==="Carousel"?"5 short slide texts":cFmt==="Reel script"?"5 shot lines each starting with a time range like 0-2s":"1 short overlay line"}, "kw": array of at most 8 short SEO keyword phrases}`,{modelTier:"quick",cache:false});
+      if(j&&typeof j.caption==="string"&&Array.isArray(j.slides)){d={caption:j.caption,slides:j.slides.map(String).slice(0,6),kw:(Array.isArray(j.kw)?j.kw:[]).map(String).slice(0,8)};src="Live AI draft";}
+    }catch(e){if(["not_granted","sampling_disabled"].includes(e.code)){live=false;setMode();}}
+  }
+  if(!d){await new Promise(r=>setTimeout(r,400));d=templateDraft(p);}
+  draft={...d,p}; slideIx=0; renderDraft(); $("#cSrc").textContent=src+". Nothing posts without approval.";
+  $("#cGo").disabled=false; $("#cGo").textContent="Draft again";
+}
+function renderDraft(){
+  if(!draft)return; const p=draft.p;
+  $("#cOutTitle").textContent=`${cFmt} draft · ${p.code}`;
+  $("#igImg").innerHTML=art(p)+(draft.slides.length>1?`<span class="slide">${slideIx+1}/${draft.slides.length}</span>`:"")+`<div class="ovl">${esc(draft.slides[slideIx]||"")}</div>`;
+  $("#igDots").innerHTML=draft.slides.length>1?draft.slides.map((_,i)=>`<i class="${i===slideIx?"on":""}"></i>`).join(""):"";
+  $("#igCap").innerHTML=`<b>touch22.in</b> ${esc(draft.caption)}<div class="kw">${draft.kw.map(k=>`<span>${esc(k)}</span>`).join("")}</div>`;
+  $("#igWhen").textContent="Draft";
+  $("#cSlides").innerHTML=draft.slides.length>1?draft.slides.map((s,i)=>`<button type="button" aria-pressed="${i===slideIx}" data-sl="${i}">${cFmt==="Reel script"?"Shot":"Slide"} ${i+1}</button>`).join(""):"";
+  $("#cText").value=draft.caption+"\n\nKeywords: "+draft.kw.join(", ");
+}
+$("#cSlides").onclick=e=>{const b=e.target.closest("[data-sl]");if(b){slideIx=+b.dataset.sl;renderDraft();}};
+$("#cText").oninput=()=>{if(!draft)return;const t=$("#cText").value.split(/\n\nKeywords:/);draft.caption=t[0];if(t[1])draft.kw=t[1].split(",").map(s=>s.trim()).filter(Boolean).slice(0,8);$("#igCap").innerHTML=`<b>touch22.in</b> ${esc(draft.caption)}<div class="kw">${draft.kw.map(k=>`<span>${esc(k)}</span>`).join("")}</div>`;};
+$("#cGo").onclick=makeDraft;
+$("#cCopy").onclick=async()=>{try{await navigator.clipboard.writeText($("#cText").value);toast("Copied");}catch(e){$("#cText").select();toast("Text selected, press Ctrl+C to copy");}};
+$("#cApprove").onclick=()=>{if(!draft)return;const used=new Set(sched.map(s=>s.d));let d=[1,3,5,6,0,2,4].find(x=>!used.has(x));if(d===undefined){toast("This week is full");return;}sched.push({d,t:`${cFmt==="Single post"?"Post":cFmt==="Reel script"?"Reel":"Carousel"} · ${draft.p.name}`,isNew:true});renderCal();toast("Scheduled. It goes live after a final check.");};
+function renderCal(){
+  const days=["Mon 19","Tue 20","Wed 21","Thu 22","Fri 23","Sat 24","Sun 25"];
+  $("#cal").innerHTML=days.map((d,i)=>`<div><b>${d}</b>${sched.filter(s=>s.d===i).map(s=>`<span class="slot ${s.isNew?"new":""}">${esc(s.t)}</span>`).join("")}</div>`).join("");
+}
+
+/* ---------- 4. PHOTO ---------- */
+const BGS=[["Maroon velvet","velvet"],["White marble","marble"],["Ivory silk","silk"],["Festive diya","festive"],["Catalogue white","white"],["Peacock satin","peacock"]];
+let bgKey="velvet", srcImg=null, srcIsUpload=false, downloads=null;
+function rng(seed){let s=seed;return()=>((s=Math.imul(s^s>>>15,1|s)+0x6D2B79F5|0),((s^s>>>14)>>>0)/4294967296);}
+function paintBg(ctx,key,W,H){
+  const r=rng(7); let g;
+  if(key==="velvet"){g=ctx.createRadialGradient(W*.5,H*.4,W*.05,W*.5,H*.5,W*.8);g.addColorStop(0,"#8E2433");g.addColorStop(1,"#3A0B14");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(let i=0;i<W*H/220;i++){ctx.fillStyle=`rgba(255,255,255,${r()*.035})`;ctx.fillRect(r()*W,r()*H,1.5,1.5);}}
+  else if(key==="marble"){ctx.fillStyle="#F3F2EF";ctx.fillRect(0,0,W,H);ctx.lineCap="round";for(let i=0;i<14;i++){ctx.strokeStyle=`rgba(${120+r()*40},${120+r()*30},${120+r()*30},${.12+r()*.2})`;ctx.lineWidth=.6+r()*2.4;ctx.beginPath();let x=r()*W,y=0;ctx.moveTo(x,y);while(y<H){x+=(r()-.5)*W*.18;y+=H*.06;ctx.lineTo(x,y);}ctx.stroke();}}
+  else if(key==="silk"){g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,"#FBF4E6");g.addColorStop(.45,"#E9D9BB");g.addColorStop(.6,"#FFF8EC");g.addColorStop(1,"#D8C39C");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(let i=0;i<6;i++){const y=H*(.1+i*.16);g=ctx.createLinearGradient(0,y-40,0,y+40);g.addColorStop(0,"rgba(255,255,255,0)");g.addColorStop(.5,"rgba(255,255,255,.35)");g.addColorStop(1,"rgba(255,255,255,0)");ctx.fillStyle=g;ctx.fillRect(0,y-40,W,80);}}
+  else if(key==="festive"){g=ctx.createRadialGradient(W*.5,H*.55,10,W*.5,H*.5,W*.75);g.addColorStop(0,"#3B2410");g.addColorStop(1,"#0E0905");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(let i=0;i<26;i++){const x=r()*W,y=r()*H*.6,rad=8+r()*W*.05;g=ctx.createRadialGradient(x,y,0,x,y,rad);g.addColorStop(0,`rgba(255,${180+r()*60},90,${.25+r()*.3})`);g.addColorStop(1,"rgba(255,180,90,0)");ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rad,0,7);ctx.fill();}}
+  else if(key==="white"){ctx.fillStyle="#FFFFFF";ctx.fillRect(0,0,W,H);g=ctx.createRadialGradient(W*.5,H*.5,W*.2,W*.5,H*.5,W*.75);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.06)");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  else {g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,"#0E5A54");g.addColorStop(.5,"#1C7E74");g.addColorStop(1,"#073B37");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);for(let i=0;i<5;i++){g=ctx.createLinearGradient(0,H*(i*.22),W,H*(i*.22+.2));g.addColorStop(0,"rgba(255,255,255,0)");g.addColorStop(.5,"rgba(255,255,255,.08)");g.addColorStop(1,"rgba(255,255,255,0)");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}}
+}
+function svgToImg(svg){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);});}
+async function loadSample(){
+  const p=byCode($("#phSample").value);
+  if(photos[p.i]&&uploaded.has(p.i)){const im=new Image();im.onload=()=>{srcImg=im;srcIsUpload=true;renderPhoto();};im.src=photos[p.i];return;}
+  // sample on a plain light "studio" backdrop so the cut-out step has something to remove
+  const svg=art(p,{svgOnly:true,noBg:true});
+  const im=await svgToImg(svg); srcImg=im; srcIsUpload=false; renderPhoto();
+}
+function cutout(img,tol){
+  const S=800, c=document.createElement("canvas");c.width=S;c.height=S;const x=c.getContext("2d");
+  const k=Math.min(S/img.width,S/img.height); const w=img.width*k,h=img.height*k; x.drawImage(img,(S-w)/2,(S-h)/2,w,h);
+  const d=x.getImageData(0,0,S,S),a=d.data;
+  // background colour = average of the four corners
+  const pts=[[4,4],[S-5,4],[4,S-5],[S-5,S-5],[S/2,4],[4,S/2]].map(([px,py])=>{const o=((py|0)*S+(px|0))*4;return[a[o],a[o+1],a[o+2],a[o+3]];});
+  const bg=[0,1,2].map(j=>pts.reduce((s,p)=>s+p[j],0)/pts.length);
+  // remove background: flood-fill from the frame edge, then any other large patch of background colour (the hole inside a ring)
+  const N=S*S, near=new Uint8Array(N), gone=new Uint8Array(N);
+  for(let p=0;p<N;p++){const o=p*4; near[p]=a[o+3]<10||Math.hypot(a[o]-bg[0],a[o+1]-bg[1],a[o+2]-bg[2])<tol?1:0;}
+  const fill=(seed,mark)=>{const st=[seed],got=[];mark[seed]=1;while(st.length){const p=st.pop();got.push(p);const px=p%S,py=(p/S)|0;
+    if(px>0&&near[p-1]&&!mark[p-1]){mark[p-1]=1;st.push(p-1)} if(px<S-1&&near[p+1]&&!mark[p+1]){mark[p+1]=1;st.push(p+1)}
+    if(py>0&&near[p-S]&&!mark[p-S]){mark[p-S]=1;st.push(p-S)} if(py<S-1&&near[p+S]&&!mark[p+S]){mark[p+S]=1;st.push(p+S)}}return got;};
+  for(let k=0;k<S;k++)for(const p of [k,N-S+k,k*S,k*S+S-1]) if(near[p]&&!gone[p])fill(p,gone);
+  const seen=new Uint8Array(N);
+  for(let p=0;p<N;p++) if(near[p]&&!gone[p]&&!seen[p]){const g=fill(p,seen); if(g.length>N*.004) for(const q of g)gone[q]=1;}
+  let kept=0,total=N;
+  for(let p=0;p<N;p++){ if(gone[p])a[p*4+3]=0; else if(a[p*4+3]>10)kept++; }
+  x.putImageData(d,0,0); return {c,kept,total};
+}
+function renderPhoto(){
+  if(!srcImg)return;
+  const ci=$("#cvIn").getContext("2d"),S=800; ci.clearRect(0,0,S,S);ci.fillStyle="#F1F1EE";ci.fillRect(0,0,S,S);
+  const k=Math.min(S/srcImg.width,S/srcImg.height);ci.drawImage(srcImg,(S-srcImg.width*k)/2,(S-srcImg.height*k)/2,srcImg.width*k,srcImg.height*k);
+  const tol=+$("#phTol").value, sc=+$("#phScale").value/100;
+  const {c,kept,total}=cutout(srcImg,tol);
+  const co=$("#cvOut").getContext("2d"); paintBg(co,bgKey,S,S);
+  const w=S*sc,off=(S-w)/2;
+  co.save();co.shadowColor="rgba(0,0,0,.45)";co.shadowBlur=36;co.shadowOffsetY=18;co.drawImage(c,off,off+S*.02,w,w);co.restore();
+  co.drawImage(c,off,off+S*.02,w,w);
+  co.font="600 22px Figtree, sans-serif";co.fillStyle=["velvet","festive","peacock"].includes(bgKey)?"rgba(255,255,255,.75)":"rgba(0,0,0,.5)";co.textAlign="right";co.fillText("TOUCH22",S-28,S-28);
+  const pct=total?Math.round(kept/total*100):0;
+  $("#phCheck").innerHTML=`<span class="ok">✓</span><div><b>Design kept exactly.</b> The piece in the output is the same pixels as your photo, only resized and moved. ${pct}% of the frame was kept as jewellery and the rest replaced with the backdrop. ${srcIsUpload?"Raise or lower the strength if edges look rough.":"This sample is an illustration; drop a real product photo to see it on your own piece."}<div class="src" style="margin-top:4px">In production a dedicated cut-out model handles shiny metal and busy backgrounds; the rule that the jewellery is never redrawn stays the same.</div></div>`;
+}
+function initPhoto(){
+  $("#phSample").innerHTML=P.map(p=>`<option value="${p.code}">${p.code} · ${esc(p.name)}</option>`).join("");$("#phSample").value="T22-RG-212";
+  $("#bgs").innerHTML=BGS.map(([l,k])=>`<button type="button" data-bg="${k}" aria-pressed="${k===bgKey}"><canvas width="90" height="90"></canvas><span>${l}</span></button>`).join("");
+  $$("#bgs button").forEach(b=>paintBg(b.querySelector("canvas").getContext("2d"),b.dataset.bg,90,90));
+  loadSample();
+  (async()=>{try{downloads=window.claude?await window.claude.use("downloads"):null;}catch(e){downloads=null}$("#phSave").hidden=false;})();
+}
+$("#bgs").addEventListener("click",e=>{const b=e.target.closest("[data-bg]");if(!b)return;bgKey=b.dataset.bg;$$("#bgs button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderPhoto();});
+$("#phSample").onchange=loadSample;
+$("#phTol").oninput=renderPhoto;$("#phScale").oninput=renderPhoto;
+$("#phFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{srcImg=im;srcIsUpload=true;renderPhoto();};im.src=URL.createObjectURL(f);};
+$("#phSave").onclick=()=>{$("#cvOut").toBlob(async b=>{try{if(downloads){await downloads.save({filename:"touch22-studio.png",data:b});return;}const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="touch22-studio.png";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);}catch(e){toast("Image not saved");}},"image/png");};
+
+/* ---------- 5. CRM ---------- */
+const Q=[
+ {d:"21",m:"Oct",t:"Mahesh bhai's birthday",who:"Shree Laxmi Jewellers, Pune",kind:"Birthday",msg:"Happy birthday, Mahesh bhai! Wishing you good health and a year of full counters. Thank you for being with Touch22 since 2017. Warm regards, Team Touch22"},
+ {d:"24",m:"Oct",t:"Reorder nudge",who:"Kalyan Gold House, Nashik",kind:"Reorder",msg:"Namaste Pradeep ji, it's been 46 days since your last order. Your bestsellers, long mangalsutras and NAAZ kadas, are back in ready stock ahead of Dhanteras. Shall I send today's catalogue?",why:"Usually reorders every 4 weeks; now 46 days."},
+ {d:"27",m:"Oct",t:"Store anniversary, 10 years",who:"Patel Ornaments, Surat",kind:"Anniversary",msg:"Hetal ben, congratulations on 10 years of Patel Ornaments! It's a privilege to be part of your journey. Here's to many more. Team Touch22"},
+ {d:"29",m:"Oct",t:"Condolence",who:"Mehta Jewels, Rajkot",kind:"Condolence",msg:"",human:true},
+ {d:"31",m:"Oct",t:"Low stock alert to buyers",who:"14 retailers who bought T22-ER-322",kind:"Stock",msg:"Rose gold ear cuffs (T22-ER-322) are our fastest-moving design this month. 18 pieces left before the Dhanteras rush. Reply YES to reserve.",why:"Cart adds up 62% in two weeks."},
+ {d:"04",m:"Nov",t:"Dhanteras wishes",who:"All 186 retailers",kind:"Festival",msg:"Shubh Dhanteras from all of us at Touch22. May this season bring prosperity to your store and your family. A Different Gold Experience."},
+ {d:"08",m:"Nov",t:"Diwali wishes",who:"All 186 retailers",kind:"Festival",msg:"Wishing you and your family a bright and prosperous Diwali. Thank you for your trust this year. Team Touch22"},
+].map(x=>({...x,status:x.human?"human":"draft"}));
+let qSel=0;
+function renderQueue(){
+  $("#queue").innerHTML=Q.map((x,i)=>`<button type="button" class="qi" data-qi="${i}" aria-pressed="${i===qSel}"><div class="date"><b>${x.d}</b><span>${x.m}</span></div><div style="min-width:0"><div class="t">${esc(x.t)}</div><div class="d">${esc(x.who)}</div></div><span class="status ${x.status}">${x.status==="draft"?"Draft ready":x.status==="done"?"Approved":"Write personally"}</span></button>`).join("");
+  const x=Q[qSel];
+  $("#editor").innerHTML=`<div class="eyebrow">${x.kind} · ${x.d} ${x.m} 2026</div><h3>${esc(x.t)}</h3><p class="muted" style="font-size:.88rem">${esc(x.who)}</p>${x.why?`<div class="hl">Why now: ${esc(x.why)}</div>`:""}
+  ${x.human?`<div class="hl">Condolence messages are never automated. The system reminds the owner and suggests a call; the words come from a person.</div><div class="field"><label for="qMsg">Your message</label><textarea id="qMsg" placeholder="Write a personal note…">${esc(x.msg)}</textarea></div>`:`<div class="field"><label for="qMsg">WhatsApp message (edit freely)</label><textarea id="qMsg">${esc(x.msg)}</textarea></div><div class="wa out" style="align-self:flex-start;max-width:100%" id="qPrev">${esc(x.msg)}<span class="when">Sends ${x.d} ${x.m}, 10:00 am</span></div>`}
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" type="button" id="qOk">${x.status==="done"?"Approved ✓":x.human?"Save and remind me":"Approve"}</button>${x.human?"":`<button class="btn" type="button" id="qSkip">Skip this one</button>`}</div><p class="src">Demo only. Nothing is sent from this page.</p>`;
+  $("#qMsg").oninput=e=>{x.msg=e.target.value;const pv=$("#qPrev");if(pv)pv.firstChild.textContent=x.msg;};
+  $("#qOk").onclick=()=>{x.status=x.human?"human":"done";if(!x.human)qSel=Math.min(Q.length-1,qSel+1);renderQueue();toast(x.human?"Reminder saved":"Approved and queued for WhatsApp");};
+  const sk=$("#qSkip");if(sk)sk.onclick=()=>{qSel=Math.min(Q.length-1,qSel+1);renderQueue();};
+}
+$("#queue").addEventListener("click",e=>{const b=e.target.closest("[data-qi]");if(b){qSel=+b.dataset.qi;renderQueue();}});
+$("#approveAll").onclick=()=>{let n=0;Q.forEach(x=>{if(x.status==="draft"&&["Birthday","Anniversary","Festival"].includes(x.kind)){x.status="done";n++;}});renderQueue();toast(`${n} routine drafts approved`);};
+
+/* ---------- 6. TREND ---------- */
+const TR=[["T22-BG-150",42,118],["T22-RG-207",38,131],["T22-ER-322",31,164],["T22-MS-402",29,77],["T22-CH-503",24,58],["T22-RG-225",21,96],["T22-BG-104",19,49],["T22-ER-305",17,88],["T22-BR-702",12,41],["T22-RG-212",9,52]];
+const PREV={"T22-ER-322":6,"T22-RG-225":7,"T22-BG-150":1,"T22-RG-207":2,"T22-MS-402":3,"T22-CH-503":4};
+let tMode="Combined";
+chipRow($("#trendMode"),["Combined","Orders","Cart adds"],tMode,v=>{tMode=v;drawTrend();});
+function drawTrend(){
+  const sc=r=>tMode==="Orders"?r[1]:tMode==="Cart adds"?r[2]:r[1]*3+r[2];
+  const rows=TR.map(r=>({p:byCode(r[0]),o:r[1],c:r[2],v:sc(r)})).sort((a,b)=>b.v-a.v).slice(0,8);
+  const max=Math.ceil(Math.max(...rows.map(r=>r.v))/50)*50, W=640,LH=34,top=26,left=240,right=60,H=top+rows.length*LH+10, x=v=>left+(W-left-right)*v/max;
+  const ticks=[0,.25,.5,.75,1].map(t=>Math.round(max*t));
+  $("#chart").innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px"><h3>Top designs · ${tMode.toLowerCase()}</h3><span class="src">${tMode==="Combined"?"Score = orders × 3 + cart adds":tMode==="Orders"?"Pieces ordered, Sept 2026":"Times added to a cart, Sept 2026"} · sample data</span></div>
+  <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Bar chart of top designs">
+  ${ticks.map(t=>`<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${top-6}" y2="${H-8}"/><text x="${x(t)}" y="${top-12}" text-anchor="middle">${t}</text>`).join("")}
+  ${rows.map((r,i)=>{const y=top+i*LH;const up=PREV[r.p.code]&&PREV[r.p.code]>i+1;return `<text x="${left-10}" y="${y+LH/2+4}" text-anchor="end">${esc(r.p.name.length>32?r.p.name.slice(0,31)+"…":r.p.name)}</text><rect class="bar ${i<3?"top":""}" x="${left}" y="${y+7}" width="${Math.max(2,x(r.v)-left)}" height="${LH-14}" rx="3"/><text class="val" x="${x(r.v)+6}" y="${y+LH/2+4}">${r.v}${up?" ▲":""}</text>`}).join("")}
+  </svg><p class="src" style="margin-top:6px">▲ climbed in the ranking since August. Gold bars are the three designs featured.</p>`;
+  const t3=rows.slice(0,3);
+  $("#trendText").textContent=`This month retailers reached for light, everyday gold. ${t3[0].p.name} led the month, ${t3[1].p.name} stayed a counter favourite, and ${t3[2].p.name} ${PREV[t3[2].p.code]>3?"climbed fast":"held strong"} as Dhanteras orders began. All three are in ready stock today.`;
+  $("#ttGrid").innerHTML=t3.map(r=>pcard(r.p,{add:false})).join("");
+}
+
+/* ---------- 7. ROADMAP ---------- */
+const ROAD=[
+ ["Ask Touch22 assistant","Retailers ask about stock, weights and prices on WhatsApp or the portal and get answers from live stock, in their language.","Daily stock export, rate, WhatsApp Business API","Fewer calls for the sales team; faster carts","ask"],
+ ["Cart follow-up","Every cart gets an instant acknowledgement, a reminder if it goes quiet, and a brief for the salesperson.","Cart events from touch22.in","More carts turn into orders","flow"],
+ ["Content studio","Daily stock becomes captions, carousels and reel scripts in your voice, with a posting calendar.","Stock upload, Instagram account","Regular posting without daily writing","content"],
+ ["Photo studio","Real product photos on new backdrops without the AI changing the design.","Original product photos","Catalogue and post images in minutes","photo"],
+ ["Retailer care","Birthdays, anniversaries, festivals and reorder nudges, drafted and approved in one queue.","Client list, order history","Stronger relationships, timely reorders","crm"],
+ ["Trending@Touch from data","Monthly bestsellers and rising designs ranked from orders and cart adds.","Order and cart history","An honest trend page that sells","trend"],
+ ["Export lead research","Find international buyers, draft outreach and quotes for the new BD hire to review and send.","Target markets, export price list","A steady pipeline for exports",null],
+ ["Back office","HR tracker for attendance, leave and payroll; stock and access logs for the vault.","Google Sheets, staff list","Less admin, tighter controls",null],
+];
+$("#road").innerHTML=ROAD.map((r,i)=>`<div class="panel ritem"><div class="rn"><span class="eyebrow">${i+1} of ${ROAD.length}</span>${r[4]?'<span class="pill live"><span class="dot"></span>In this demo</span>':'<span class="pill">Next</span>'}</div><h3>${r[0]}</h3><p>${r[1]}</p><dl class="meta"><dt>Needs</dt><dd>${r[2]}</dd><dt>Wins</dt><dd>${r[3]}</dd></dl>${r[4]?`<a href="#" data-goto="${r[4]}">Open the demo →</a>`:""}</div>`).join("");
+
+/* ---------- boot ---------- */
+function rerenderAll(){renderCart();renderFlow();renderDraft();drawTrend();if(opened.has("photo"))loadSample();
+}
+$("#rate22").addEventListener("input",()=>{renderCart();renderFlow();});
+welcome();$("#log").scrollTop=0;renderCart();renderRetPick();renderFlow();renderCal();renderQueue();
+draft={...templateDraft(byCode("T22-ER-305")),p:byCode("T22-ER-305")};renderDraft();$("#cSrc").textContent="Sample draft. Press the button for a fresh one.";
+let start="ask";try{start=localStorage.getItem("t22tab")||"ask"}catch(e){}
+const fromHash=location.hash.slice(1);if(TABS.some(t=>t[0]===fromHash))start=fromHash;
+window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(TABS.some(t=>t[0]===h))show(h);});
+show(TABS.some(t=>t[0]===start)?start:"ask");
+})();
+</script>
+
+</body></html>
