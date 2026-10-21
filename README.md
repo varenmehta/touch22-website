@@ -11,6 +11,7 @@ Marketing site for **Touch22** (Unitouch Creations LLP), a B2B gold jewellery ma
 | `about.html` | Company story, timeline, values and shop-by-category. |
 | `contact.html` | Showroom address and map, WhatsApp, socials, enquiry form and FAQ. |
 | `demos/index.html` | The full AI Studio app with seven screens. Deep links work, e.g. `demos/#flow`. |
+| `orders/index.html` | **Touch22 Order Desk** demo with four screens: Overview (to-do list, late orders, stage counts), Orders (board or list), Chats (retailer WhatsApp bot in English, Hindi and Hinglish, plus one chat per factory) and Reports (factory performance, custom designs). Orders get T-numbers automatically, go to the right factory in a fixed format and move through confirm, CAD, production, QC and dispatch. Everything is simulated in the browser; **Next day** moves the clock. |
 | `404.html` | Not-found page (GitHub Pages serves it automatically). |
 | `assets/js/data.js` | **One place to edit**: contact details (WhatsApp number), default gold rate and the product catalogue. |
 | `assets/css/site.css`, `assets/js/site.js`, `assets/js/catalogue.js` | Styles and behaviour. |
