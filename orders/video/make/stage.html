@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Touch22 Order Desk film</title>
+<style>
+:root{
+  --wine:#471c1f; --accent:#67252a; --ivory:#f7f6f4; --blush:#e1cdd1; --ink:#211316; --ink-2:#5e5052; --muted:#8f8183;
+  --gold:#d6b375; --gold-2:#b8893a; --line:#e6dedb;
+  --serif:"Times New Roman","Liberation Serif",Times,serif;
+  --sans:"Nunito Sans","Avenir Next",Avenir,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:var(--ivory);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(1200px 800px at 0% 100%,#f1e6e7 0%,rgba(241,230,231,0) 60%),radial-gradient(900px 700px at 100% 0%,#f6efe3 0%,rgba(246,239,227,0) 60%),var(--ivory)}
+
+/* left rail */
+.rail{position:absolute;left:80px;top:70px;bottom:70px;width:380px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{height:22px}
+.brand span{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);border-left:1px solid #d9cfcc;padding-left:14px;line-height:1.25}
+.cap{margin-top:84px;min-height:400px;position:relative}
+.cap .in{position:absolute;inset:0;transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.cap .in.out{opacity:0;transform:translateY(-14px)}
+.cap .in.pre{opacity:0;transform:translateY(18px)}
+.cap .k{font-size:14px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-2)}
+.cap h1{font-family:var(--serif);font-weight:400;font-size:50px;line-height:1.06;margin:18px 0 0;color:var(--wine);letter-spacing:-.005em}
+.cap .rule{width:56px;height:2px;background:var(--gold);margin:28px 0 24px}
+.cap p{font-size:22px;line-height:1.55;color:var(--ink-2);margin:0}
+.cap p b{color:var(--ink);font-weight:700}
+.steps{margin-top:auto;list-style:none;padding:0;margin-bottom:0;display:flex;flex-direction:column;gap:9px;position:relative}
+.steps:before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:#ddd2cf}
+.steps li{display:flex;align-items:center;gap:16px;font-size:15px;color:#a99c9e;position:relative;transition:color .5s}
+.steps li i{width:13px;height:13px;border-radius:50%;background:var(--ivory);border:1.5px solid #cfc3c0;flex:none;transition:all .5s;position:relative;z-index:1}
+.steps li.done{color:var(--ink-2)}
+.steps li.done i{background:var(--gold);border-color:var(--gold)}
+.steps li.on{color:var(--wine);font-weight:800}
+.steps li.on i{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 5px rgba(103,37,42,.14)}
+
+/* app window */
+.win{position:absolute;left:520px;top:56px;width:1340px;height:968px;border-radius:18px;overflow:hidden;background:#fff;
+  box-shadow:0 1px 2px rgba(33,19,22,.06),0 30px 80px -30px rgba(71,28,31,.35),0 0 0 1px rgba(71,28,31,.06)}
+.cam{position:absolute;left:0;top:0;width:1340px;height:968px;transform-origin:0 0;transition:transform 1.6s cubic-bezier(.45,.05,.25,1)}
+.chrome{height:40px;background:#f3efed;border-bottom:1px solid #e8e1df;display:flex;align-items:center;padding:0 16px;gap:8px}
+.chrome i{width:12px;height:12px;border-radius:50%;background:#dcd2cf}
+.chrome .url{margin:0 auto;font-size:13px;color:var(--muted);background:#fff;border-radius:8px;padding:4px 18px;border:1px solid #ebe4e2;min-width:340px;text-align:center}
+iframe{display:block;border:0;width:1340px;height:928px;background:#f7f6f4}
+.over{position:absolute;left:0;top:40px;width:1340px;height:928px;pointer-events:none}
+.cursor{position:absolute;left:0;top:0;width:30px;height:30px;transform:translate(700px,600px);transition:transform 1s cubic-bezier(.45,.05,.25,1),opacity .4s;z-index:5;filter:drop-shadow(0 3px 5px rgba(0,0,0,.25))}
+.cursor svg{width:30px;height:30px;display:block}
+.ring{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;border:3px solid var(--gold);opacity:0;z-index:4}
+.ring.go{animation:ring .7s ease-out}
+@keyframes ring{0%{opacity:.95;transform:scale(.3)}100%{opacity:0;transform:scale(1.25)}}
+.spot{position:absolute;border-radius:14px;border:2.5px solid var(--gold);box-shadow:0 0 0 6px rgba(214,179,117,.22),0 0 0 9999px rgba(33,19,22,.0);opacity:0;transition:opacity .6s,left .6s,top .6s,width .6s,height .6s;z-index:3}
+.spot.on{opacity:1}
+.spot.dim{box-shadow:0 0 0 6px rgba(214,179,117,.25),0 0 0 9999px rgba(33,19,22,.28)}
+.spot .tag{position:absolute;left:-2px;top:-40px;white-space:nowrap;background:var(--wine);color:#fff;font-size:15px;font-weight:700;padding:6px 12px;border-radius:9px}
+.spot .tag.below{top:auto;bottom:-42px}
+.spot .tag b{color:var(--gold)}
+
+/* full-screen cards */
+.card{position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;transition:opacity 1.2s ease}
+.card.hide{opacity:0;pointer-events:none}
+.dark{background:radial-gradient(1100px 700px at 50% 40%,#5a2328 0%,#471c1f 55%,#3a1619 100%);color:var(--ivory)}
+.title{text-align:center}
+.title .mono{height:120px;opacity:0;transform:translateY(10px) scale(.94);transition:all 1.4s cubic-bezier(.2,.7,.2,1)}
+.title .word{display:block;height:44px;margin:38px auto 0;opacity:0;transition:opacity 1.4s ease .3s,letter-spacing 1.6s}
+.title .line{width:0;height:1px;background:var(--gold);margin:40px auto 34px;transition:width 1.4s cubic-bezier(.6,0,.2,1) .5s}
+.title h1{font-family:var(--serif);font-weight:400;font-size:96px;margin:0;letter-spacing:.01em;opacity:0;transform:translateY(14px);transition:all 1.3s cubic-bezier(.2,.7,.2,1) .8s}
+.title p{font-size:18px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin:26px 0 0;opacity:0;transition:opacity 1.3s ease 1.3s}
+.title.in .mono{opacity:1;transform:none}
+.title.in .word{opacity:1}
+.title.in .line{width:120px}
+.title.in h1{opacity:1;transform:none}
+.title.in p{opacity:1}
+.title small{display:block;margin-top:70px;font-size:15px;color:rgba(247,246,244,.55);opacity:0;transition:opacity 1.2s ease 2s;letter-spacing:.04em}
+.title.in small{opacity:1}
+
+.light{background:var(--ivory)}
+.why{width:1280px}
+.why .k{font-size:15px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-2);text-align:center}
+.why h2{font-family:var(--serif);font-weight:400;font-size:62px;color:var(--wine);text-align:center;margin:18px 0 64px;line-height:1.1}
+.why .row{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.why .it{background:#fff;border-radius:20px;padding:34px 32px;box-shadow:0 1px 2px rgba(33,19,22,.04),0 18px 40px -24px rgba(71,28,31,.25);opacity:0;transform:translateY(24px);transition:all 1s cubic-bezier(.2,.7,.2,1)}
+.why .it .n{font-family:var(--serif);font-size:40px;color:var(--gold-2)}
+.why .it b{display:block;font-size:24px;margin:8px 0 10px;color:var(--ink)}
+.why .it span{font-size:19px;line-height:1.5;color:var(--ink-2)}
+.why .fix{text-align:center;margin-top:60px;font-family:var(--serif);font-size:34px;color:var(--ink);opacity:0;transition:opacity 1.2s}
+.why .fix em{color:var(--accent);font-style:italic}
+.why.in .it{opacity:1;transform:none}
+.why.in .it:nth-child(2){transition-delay:.5s}
+.why.in .it:nth-child(3){transition-delay:1s}
+.why.in .fix{opacity:1;transition-delay:2.6s}
+.why .k,.why h2{opacity:0;transition:opacity 1s}
+.why.in .k,.why.in h2{opacity:1}
+
+.recap{display:flex;gap:18px;justify-content:center;margin-top:46px;opacity:0;transition:opacity 1.2s ease 1.8s}
+.title.in .recap{opacity:1}
+.recap span{border:1px solid rgba(214,179,117,.5);color:var(--ivory);border-radius:999px;padding:10px 22px;font-size:18px}
+.fadeblack{position:absolute;inset:0;background:#000;z-index:99;opacity:0;transition:opacity 1.4s;pointer-events:none}
+.fadeblack.on{opacity:1}
+</style>
+</head>
+<body>
+<aside class="rail">
+  <div class="brand"><img src="word-dark.png" alt="Touch22"><span>Order<br>Desk</span></div>
+  <div class="cap" id="cap"></div>
+  <ol class="steps" id="steps"></ol>
+</aside>
+
+<div class="win" id="win">
+  <div class="cam" id="cam">
+    <div class="chrome"><i></i><i></i><i></i><div class="url">Touch22 Order Desk</div></div>
+    <iframe id="app" title="Order Desk"></iframe>
+    <div class="over" id="over">
+      <div class="spot" id="spot"><div class="tag" id="spotTag"></div></div>
+      <div class="ring" id="ring"></div>
+      <div class="cursor" id="cursor"><svg viewBox="0 0 24 24"><path d="M4 2.5v17.2l4.6-4.3 3 6.6 3-1.4-3-6.5h6.3z" fill="#fff" stroke="#211316" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+    </div>
+  </div>
+</div>
+
+<div class="card dark" id="intro">
+  <div class="title" id="introT">
+    <img class="mono" src="mono-light.png" alt="">
+    <img class="word" src="word-light.png" alt="Touch22">
+    <div class="line"></div>
+    <h1>Order Desk</h1>
+    <p>From a WhatsApp message to a delivered piece</p>
+  </div>
+</div>
+
+<div class="card light hide" id="why">
+  <div class="why" id="whyT">
+    <div class="k">Today</div>
+    <h2>Orders live in busy WhatsApp chats</h2>
+    <div class="row">
+      <div class="it"><div class="n">01</div><b>Mixed-up messages</b><span>Many orders sit in one factory chat, with no order number to point at.</span></div>
+      <div class="it"><div class="n">02</div><b>Follow-ups by memory</b><span>Deadlines of 10 to 15 days slip, and delays are found out late.</span></div>
+      <div class="it"><div class="n">03</div><b>No clear picture</b><span>Hard to see which factory is reliable, or which designs go custom.</span></div>
+    </div>
+    <div class="fix">Order Desk gives every order <em>one number</em>, and follows it to the end.</div>
+  </div>
+</div>
+
+<div class="card dark hide" id="outro">
+  <div class="title" id="outroT">
+    <img class="mono" src="mono-light.png" alt="">
+    <img class="word" src="word-light.png" alt="Touch22">
+    <div class="line"></div>
+    <h1>Order Desk</h1>
+    <div class="recap"><span>One number per order</span><span>Right factory</span><span>Automatic follow-ups</span><span>Clear reports</span></div>
+    <small>Demo with sample data. WhatsApp messages are simulated.</small>
+  </div>
+</div>
+<div class="fadeblack" id="fb"></div>
+
+<script>
+const STEPS=["Morning overview","Retailer orders on WhatsApp","Hindi and Hinglish","Order number and factory","Factory confirms","CAD approval","Follow-ups and delays","Quality check","Repair or wrong order","Reports"];
+const $=s=>document.querySelector(s);
+$("#steps").innerHTML=STEPS.map(s=>`<li><i></i>${s}</li>`).join("");
+window.stage={
+  step(i,title,body){
+    const lis=[...document.querySelectorAll("#steps li")];
+    lis.forEach((li,j)=>{li.className=j<i?"done":j===i?"on":"";});
+    const cap=$("#cap");const old=cap.querySelector(".in");
+    if(old){old.classList.add("out");setTimeout(()=>old.remove(),700);}
+    const el=document.createElement("div");el.className="in pre";
+    el.innerHTML=`<div class="k">Step ${String(i+1).padStart(2,"0")} of ${STEPS.length}</div><h1>${title}</h1><div class="rule"></div><p>${body}</p>`;
+    setTimeout(()=>{cap.appendChild(el);requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.remove("pre")));},old?450:0);
+  },
+  cursor(x,y,ms){const c=$("#cursor");c.style.transitionDuration=(ms||1000)+"ms";c.style.transform=`translate(${x-4}px,${y-3}px)`;},
+  hideCursor(h){$("#cursor").style.opacity=h?0:1;},
+  click(x,y){const r=$("#ring");r.style.left=x+"px";r.style.top=y+"px";r.classList.remove("go");void r.offsetWidth;r.classList.add("go");},
+  spot(b,label,opts){const s=$("#spot");if(!b){s.classList.remove("on","dim");return;}
+    const p=(opts&&opts.pad)||8;s.style.left=(b.x-p)+"px";s.style.top=(b.y-p)+"px";s.style.width=(b.w+2*p)+"px";s.style.height=(b.h+2*p)+"px";
+    const t=$("#spotTag");t.innerHTML=label||"";t.style.display=label?"block":"none";t.className="tag"+(opts&&opts.below?" below":"");
+    s.classList.toggle("dim",!!(opts&&opts.dim));s.classList.add("on");},
+  cam(scale,cx,cy,ms){const cam=$("#cam");cam.style.transitionDuration=(ms||1600)+"ms";
+    if(!scale||scale===1){cam.style.transform="none";return;}
+    const W=1340,H=968;let tx=W/2-cx*scale,ty=H/2-cy*scale;
+    tx=Math.min(0,Math.max(W-W*scale,tx));ty=Math.min(0,Math.max(H-H*scale,ty));
+    cam.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;},
+  card(id,show){$("#"+id).classList.toggle("hide",!show);},
+  cardIn(id){$("#"+id).classList.add("in");},
+  black(on){$("#fb").classList.toggle("on",on);}
+};
+</script>
+</body>
+</html>
