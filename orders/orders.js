@@ -63,12 +63,10 @@ const PERSONAS=[
  {id:"shivam",name:"Shivam Jewellers",cust:"Shivam Yavatmal",city:"Yavatmal",contact:"Shivam",lang:"hn"}
 ];
 const STAGES=["Enquiry","Awaiting Factory","CAD Making","CAD Approval","In Production","Ready at Factory","At Office · QC","Dispatched","Completed"];
-const STAGE_LBL={"Enquiry":"New enquiry","Awaiting Factory":"Awaiting factory reply","CAD Making":"CAD being made","CAD Approval":"CAD with retailer","In Production":"In production","Ready at Factory":"Ready at factory","At Office · QC":"At office · QC","Dispatched":"Dispatched","Completed":"Completed"};
+const STAGE_LBL={"Enquiry":"New order","Awaiting Factory":"Waiting for factory","CAD Making":"CAD being made","CAD Approval":"CAD with retailer","In Production":"Being made","Repair":"Repair at factory","Wrong Order":"Remake at factory","Ready at Factory":"Ready to collect","At Office · QC":"Quality check","Dispatched":"Shipped","Completed":"Delivered","Cancelled":"Cancelled"};
 const WITH_FACTORY=["Awaiting Factory","CAD Making","In Production","Repair","Wrong Order"];
 const CLOSED=["Completed","Cancelled"];
 const ISSUE_REASONS={Repair:["Stone loose","Polish / finishing","Solder joint weak","Weight short"],"Wrong Order":["Wrong size","Wrong purity","Wrong design","Wrong length"]};
-const pillCls=s=>({"Enquiry":"st-enq","Awaiting Factory":"st-wait","CAD Making":"st-cad","CAD Approval":"st-cad","In Production":"st-prod","Ready at Factory":"st-ready","At Office · QC":"st-qc","Dispatched":"st-disp","Completed":"st-done","Repair":"st-issue","Wrong Order":"st-issue","Hold":"st-cancel","Cancelled":"st-cancel"}[s]||"");
-const pill=s=>`<span class="pill ${pillCls(s)}">${esc(STAGE_LBL[s]||s)}</span>`;
 
 /* ---------- state ---------- */
 const KEY="t22-order-desk-v1";
@@ -347,12 +345,12 @@ function factoryEvent(o,intent,x={},typed){
       say(d===o.deadline?`${R} ok, ${fmt(d)} tak ho jayega`:`${R} ok but ${fmt(d)} tak milega`);
       if(o.design==="Custom"){setStatus(o,"CAD Making",`${fac} confirmed${d!==o.deadline?", needs till "+fmt(d):""}. CAD in progress`,"f");if(S.set.simFactory)later(()=>simReply(R,"cad"),3200);}
       else setStatus(o,"In Production",`${fac} confirmed. Deadline ${fmt(dueDate(o))}`,"f");
-      log(`${fac} confirmed #${R}${d!==o.deadline?" for "+fmt(d):""}`,R);toast(`<b>${esc(fac)}</b> confirmed #${R}. Dashboard updated`);
+      log(`${fac} confirmed #${R}${d!==o.deadline?" for "+fmt(d):""}`,R);toast(`<b>${esc(fac)}</b> confirmed #${R}`);
       notify(o,"confirmed");break;}
     case "reject":
       say(`${R} nahi ho payega abhi, karigar busy hai 🙏`);
       o.status="Enquiry";hist(o,`${fac} declined. Pick another factory`,"x");log(`${fac} declined #${R}, needs another factory`,R);
-      toast(`<b>${esc(fac)}</b> declined #${R}. It is back in New enquiries`);break;
+      toast(`<b>${esc(fac)}</b> declined #${R}. Pick another factory in To do`);break;
     case "cad":
       say(`${R} CAD ready 👇`);if(!typed)S.fchat[fac][S.fchat[fac].length-1].art={p:o.product,cad:true};
       setStatus(o,"CAD Approval","CAD received from factory, sent to retailer for approval","f");
@@ -576,7 +574,7 @@ function placeOrder(id){
   bpush(id,{from:"bot",text:fill(T.placed,{ref})});
   const r=route(o);o.route={f:r.best.f,conf:r.conf,why:r.best.why,alts:r.alts.map(a=>a.f)};
   if(S.set.autoRoute&&r.conf==="high"){sendToFactory(o,r.best.f,true);hist(o,`Auto-routed to ${r.best.f}: ${r.best.why.join(", ")}`,"");toast(`<b>#${ref}</b> created and sent to ${esc(r.best.f)} automatically`);}
-  else{toast(`<b>#${ref}</b> created. Pick a factory in New enquiries (${r.best.f} or ${r.alts.map(a=>a.f).join(" / ")} look close)`);}
+  else{toast(`<b>#${ref}</b> created. Pick a factory in To do (${r.best.f} or ${r.alts.map(a=>a.f).join(" / ")} look close)`);}
   save();renderAll();
 }
 function notify(o,key){
@@ -616,369 +614,294 @@ function art(p,cad){
   return `<svg class="art" viewBox="0 0 240 170" role="img" aria-label="${cad?"CAD drawing":"Design photo"} of ${esc(p)}"><rect width="240" height="170" fill="${bg}"/>${defs}${cadx}${body}</svg>`;
 }
 
-/* ---------- rendering ---------- */
-const ICON={
- dashboard:'<path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/>',
- orders:'<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
- bot:'<path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.4A8.5 8.5 0 1 1 21 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>',
- factories:'<path d="M3 21V11l5 3v-3l5 3v-3l5 3V5h3v16zM7 17h2M12 17h2M17 17h1"/>',
- followups:'<path d="M6 9a6 6 0 1 1 12 0c0 6.5 2.5 8 2.5 8h-17S6 15.5 6 9M10 20.5a2 2 0 0 0 4 0"/>',
- insights:'<path d="M4 20V11M10 20V5M16 20v-6M2 20h20"/>',
- how:'<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/>'
-};
-const VIEWS=[["dashboard","Dashboard","Today's orders, what needs action and where things are stuck"],["orders","Orders","Every order with its number, factory, deadline and status"],
- ["bot","Retailer bot","How a retailer places an order on WhatsApp, in English, Hindi or Hinglish"],["factories","Factory chats","One chat per factory, every message tagged with the order number"],
- ["followups","Follow-ups","Who to chase today, sent as one numbered message per factory"],["insights","Insights","Factory performance and which designs go custom"],["how","How it works","The flow, the gaps it closes and what's needed to go live"]];
-let view="dashboard";
-const svg=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 
-function renderNav(){
-  const due=followDue().length, enq=S.orders.filter(o=>o.status==="Enquiry").length;
-  $("#nav").innerHTML=VIEWS.map(([k,l])=>`<a href="#${k}" class="${view===k?"on":""}">${svg(k)}<span>${l}</span>${k==="followups"&&due?`<span class="badge">${due}</span>`:""}${k==="dashboard"&&enq?`<span class="badge">${enq}</span>`:""}</a>`).join("");
-  const v=VIEWS.find(x=>x[0]===view);$("#pageTitle").textContent=v[1];$("#pageSub").textContent=v[2];
+/* ---------- interface ---------- */
+const GROUPS=[
+ {k:"new",l:"New",s:["Enquiry"],h:"Choose a factory"},
+ {k:"fac",l:"At factory",s:["Awaiting Factory"],h:"Waiting for a reply"},
+ {k:"cad",l:"Design",s:["CAD Making","CAD Approval"],h:"CAD and approval"},
+ {k:"make",l:"Making",s:["In Production","Repair","Wrong Order"],h:"In production"},
+ {k:"qc",l:"Quality check",s:["Ready at Factory","At Office · QC"],h:"Collect and check"},
+ {k:"ship",l:"Shipped",s:["Dispatched"],h:"On the way"}];
+const grpOf=s=>GROUPS.find(g=>g.s.includes(s));
+const stCls=s=>isIssueS(s)?"issue":CLOSED.includes(s)?"done":(grpOf(s)||{}).k||"";
+const isIssueS=s=>s==="Repair"||s==="Wrong Order";
+const status=s=>`<span class="st ${stCls(s)}"><i></i>${esc(STAGE_LBL[s]||s)}</span>`;
+const item=o=>`${o.product==="MS"?"Mangalsutra":o.product} · ${o.purity} · ${o.weight} g`;
+const refBtn=r=>`<button class="ref" data-open="${r}" type="button">#${r}</button>`;
+const ICON={
+ overview:'<path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ orders:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 4v16M15 4v16"/>',
+ chats:'<path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.4A8.5 8.5 0 1 1 21 12z"/>',
+ reports:'<path d="M4 20V11M10 20V5M16 20v-6M2 20h20"/>'
+};
+const VIEWS=[["overview","Overview"],["orders","Orders"],["chats","Chats"],["reports","Reports"]];
+let view="overview";
+const svg=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+
+function todos(){
+  const A=active();
+  return {enq:S.orders.filter(o=>o.status==="Enquiry"),ready:A.filter(o=>o.status==="Ready at Factory"),qc:A.filter(o=>o.status==="At Office · QC"),
+    cad:A.filter(o=>o.status==="CAD Approval"),due:followDue()};
+}
+function todoCount(t){return t.enq.length+t.ready.length+t.qc.length+t.cad.length+(t.due.length?1:0);}
+
+function renderTabs(){
+  const t=todos();const n=todoCount(t);
+  $("#tabs").innerHTML=VIEWS.map(([k,l])=>`<a href="#${k}" class="${view===k?"on":""}">${svg(k)}<span>${l}</span>${k==="overview"&&n?`<span class="n">${n}</span>`:""}</a>`).join("");
   $("#todayLbl").textContent=fmtL(S.today);
 }
 function renderAll(){
-  renderNav();
-  ({dashboard:renderDash,orders:renderOrders,bot:renderBot,factories:renderFac,followups:renderFollow,insights:renderInsights,how:renderHow})[view]();
+  renderTabs();
+  ({overview:renderOverview,orders:renderOrders,chats:renderChats,reports:renderReports})[view]();
   if(drawerRef)renderDrawer();
 }
-const refBtn=r=>`<button class="ref" data-open="${r}" type="button">#${r}</button>`;
 
-function renderDash(){
-  const A=active();
-  const urgent=A.filter(o=>o.priority==="Urgent").length;
-  const over=A.filter(isOver);
-  const due=followDue();
-  const wait=A.filter(o=>o.status==="Awaiting Factory").length;
-  const issues=A.filter(o=>o.status==="Repair"||o.status==="Wrong Order").length;
-  const month=S.today.slice(0,7);
-  const doneM=S.orders.filter(o=>o.status==="Completed"&&o.doneAt&&o.doneAt.slice(0,7)===month).length;
+/* Overview */
+function renderOverview(){
+  const A=active(),t=todos(),n=todoCount(t);
+  const late=A.filter(isOver).sort((a,b)=>lateBy(b)-lateBy(a));
   const recent=S.orders.filter(o=>o.readyAt&&o.readyAt<=S.today&&diff(S.today,o.readyAt)<=30&&o.deadline);
   const ot=recent.length?recent.filter(o=>o.readyAt<=o.deadline).length/recent.length:0;
-  const k=(lbl,v,d,go,cls,dot)=>`<button class="kpi ${cls||""}" data-go="${go}" type="button"><div class="k">${dot?`<span class="dot" style="background:${dot}"></span>`:""}${lbl}</div><div class="v">${v}</div><div class="d">${d}</div></button>`;
-  const enq=S.orders.filter(o=>o.status==="Enquiry");
-  const qc=A.filter(o=>o.status==="At Office · QC");
-  const rdy=A.filter(o=>o.status==="Ready at Factory");
-  const cadA=A.filter(o=>o.status==="CAD Approval");
-  const disp=A.filter(o=>o.status==="Dispatched");
-  const counts=STAGES.map(s=>[s,S.orders.filter(o=>o.status===s&&(s!=="Completed"||(o.doneAt||"").slice(0,7)===month)).length]);
-  $("#v-dashboard").innerHTML=`
-  <div class="kpis">
-    ${k("Active orders",A.length,`${S.orders.filter(o=>o.date===S.today).length} new today`,"orders:active")}
-    ${k("Urgent active",urgent,"Follow-up daily","orders:urgent","","var(--wine-2)")}
-    ${k("Overdue at factory",over.length,"Past the factory deadline","orders:overdue",over.length?"alert":"","var(--bad)")}
-    ${k("Follow-ups due today",due.length,S.set.autoFollow?"Sent automatically each morning":"Send from Follow-ups","followups","gold")}
-    ${k("Awaiting factory reply",wait,"Order sent, no answer yet","orders:Awaiting Factory")}
-    ${k("Repair / wrong order",issues,"Back at the factory","orders:issues",issues?"alert":"")}
-    ${k("Completed this month",doneM,MON[+month.slice(5)-1]+" "+month.slice(0,4),"orders:done")}
-    ${k("Ready on time",pct(ot),"Pieces ready by deadline, last 30 days","insights")}
+  const hr=new Date().getHours();const hello=hr<12?"Good morning":hr<17?"Good afternoon":"Good evening";
+  const facBy={};t.due.forEach(o=>facBy[o.factory]=(facBy[o.factory]||0)+1);
+  const rows=[];
+  if(t.due.length)rows.push(`<div class="r-item"><div class="r-ic gold">🔔</div><div class="r-body"><b>Send today's follow-ups</b><div class="s">${t.due.length} order${t.due.length>1?"s":""} at ${Object.keys(facBy).length} factor${Object.keys(facBy).length>1?"ies":"y"} · one numbered message per factory</div></div><div class="r-act"><button class="btn primary sm" id="sendAll" type="button">Send all</button></div></div>`);
+  t.enq.forEach(o=>{const r=route(o);rows.push(`<div class="r-item"><div class="r-ic">🆕</div><div class="r-body"><b>Choose a factory for ${refBtn(o.ref)}</b>${o.priority==="Urgent"?' <span class="tag urgent">Urgent</span>':""}<div class="s">${esc(o.customer)} · ${item(o)}${o.design==="Custom"?" · new design":""} · suggested ${r.best.f} (${r.best.why[0]==null?"":esc(r.best.why.find(w=>w.includes("on time"))||"")})</div></div><div class="r-act"><select class="sel" data-fsel="${o.ref}" aria-label="Factory">${r.all.map(a=>`<option ${a.f===r.best.f?"selected":""}>${a.f}</option>`).join("")}</select><button class="btn primary sm" data-send="${o.ref}" type="button">Send</button></div></div>`);});
+  t.qc.forEach(o=>rows.push(`<div class="r-item"><div class="r-ic">🔍</div><div class="r-body"><b>Check ${refBtn(o.ref)}</b><div class="s">${esc(o.customer)} · ${item(o)}${o.size?" · size "+esc(o.size):""} · from ${o.factory}</div></div><div class="r-act"><button class="btn good sm" data-act="qcpass" data-ref="${o.ref}" type="button">Pass, ship it</button><button class="btn danger sm" data-problem="${o.ref}" type="button">Problem</button></div></div>`));
+  t.ready.forEach(o=>rows.push(`<div class="r-item"><div class="r-ic ok">📦</div><div class="r-body"><b>Collect ${refBtn(o.ref)} from ${o.factory}</b><div class="s">${esc(o.customer)} · ${item(o)}</div></div><div class="r-act"><button class="btn sm" data-act="receive" data-ref="${o.ref}" type="button">Received</button></div></div>`));
+  t.cad.forEach(o=>rows.push(`<div class="r-item"><div class="r-ic gold">✏️</div><div class="r-body"><b>CAD waiting for approval, ${refBtn(o.ref)}</b><div class="s">${esc(o.customer)} · sent on WhatsApp</div></div><div class="r-act"><button class="btn sm" data-act="cadApprove" data-ref="${o.ref}" type="button">Approved</button></div></div>`));
+  $("#v-overview").innerHTML=`
+  <div class="page-head"><div><h1>${hello}</h1><p>${fmtL(S.today)} · ${A.length} orders in progress</p></div></div>
+  <div class="stats">
+    <button class="stat hl" data-scroll="todo" type="button"><div class="l">Needs you today</div><div class="v">${n}</div><div class="h">Tasks in your to-do list</div></button>
+    <button class="stat" data-go="orders" type="button"><div class="l">In progress</div><div class="v">${A.length}</div><div class="h">${A.filter(o=>o.priority==="Urgent").length} urgent</div></button>
+    <button class="stat ${late.length?"bad":""}" data-go="orders:late" type="button"><div class="l">Running late</div><div class="v">${late.length}</div><div class="h">Past the factory's deadline</div></button>
+    <button class="stat" data-go="reports" type="button"><div class="l">Ready on time</div><div class="v">${pct(ot)}</div><div class="h">Last 30 days, all factories</div></button>
   </div>
-  <div class="card" style="margin-bottom:16px">
-    <div class="card-head"><div><h2>Order pipeline</h2><div class="hint">Every open order sits in exactly one step. Tap a step to see its orders.</div></div></div>
-    <div class="pipe">${counts.map(([s,n])=>`<button data-go="orders:${s}" type="button"><div class="n">${n}</div><div class="l">${STAGE_LBL[s]}${s==="Completed"?" (this month)":""}</div></button>`).join("")}</div>
-    <div class="legend"><span>Off the main path:</span>
-      <button class="pill st-issue" data-go="orders:issues" style="cursor:pointer" type="button">Repair / wrong order: ${issues}</button>
-      <button class="pill st-cancel" data-go="orders:Cancelled" style="cursor:pointer;text-decoration:none" type="button">Cancelled: ${S.orders.filter(o=>o.status==="Cancelled").length}</button></div>
-  </div>
-  <div class="grid g-3-2">
-    <div class="grid" style="align-content:start">
-      <div class="card"><div class="card-head"><div><h2>New enquiries</h2><div class="hint">Orders the bot has taken that need a factory. The suggestion uses product, purity, on-time record and current load.</div></div></div>
-        <div class="list">${enq.length?enq.map(o=>{const r=route(o);return `<div class="row">${refBtn(o.ref)}<div class="main-t"><b>${esc(o.customer)}</b> · ${o.product} ${o.purity} · ${o.weight} g ${o.priority==="Urgent"?'<span class="pill urgent">Urgent</span>':""} ${o.design==="Custom"?'<span class="pill custom">New design</span>':""}<div class="s">Suggested <b>${r.best.f}</b>: ${esc(r.best.why.slice(0,3).join(", "))}${r.conf==="check"?` · close call with ${r.alts.map(a=>a.f).join(", ")}`:""}</div></div>
-          <div class="acts"><select class="sel" data-fsel="${o.ref}">${r.all.map(a=>`<option ${a.f===r.best.f?"selected":""}>${a.f}</option>`).join("")}</select><button class="btn sm primary" data-send="${o.ref}" type="button">Send to factory</button></div></div>`;}).join(""):`<div class="empty">No new enquiries. Place one from the <a href="#bot">Retailer bot</a>.</div>`}</div></div>
-      <div class="card"><div class="card-head"><div><h2>Needs action today</h2><div class="hint">Pieces to collect, check or chase.</div></div></div>
-        <div class="list">
-          ${qc.map(o=>`<div class="row">${refBtn(o.ref)}<div class="main-t"><b>QC pending</b> · ${o.product} ${o.purity} ${o.size?"· "+esc(o.size):""}<div class="s">${esc(o.customer)} · from ${o.factory}${o.remarks?" · "+esc(o.remarks):""}</div></div><div class="acts"><button class="btn sm ok" data-act="qcpass" data-ref="${o.ref}" type="button">QC pass</button><button class="btn sm bad" data-open="${o.ref}" type="button">Repair / wrong…</button></div></div>`).join("")}
-          ${rdy.map(o=>`<div class="row">${refBtn(o.ref)}<div class="main-t"><b>Ready at ${o.factory}</b> · ${o.product} ${o.purity}<div class="s">${esc(o.customer)} · collect and bring to office</div></div><div class="acts"><button class="btn sm" data-act="receive" data-ref="${o.ref}" type="button">Received at office</button></div></div>`).join("")}
-          ${cadA.map(o=>`<div class="row">${refBtn(o.ref)}<div class="main-t"><b>CAD with retailer</b> · ${o.product}<div class="s">${esc(o.customer)} · waiting for approval on WhatsApp</div></div><div class="acts"><button class="btn sm" data-act="cadApprove" data-ref="${o.ref}" type="button">Mark approved</button></div></div>`).join("")}
-          ${disp.length?`<div class="row"><span class="pill st-disp">${disp.length}</span><div class="main-t">Dispatched and on the way<div class="s">Marked delivered automatically after 2 days unless the retailer reports a problem</div></div><div class="acts"><button class="btn sm" data-go="orders:Dispatched" type="button">View</button></div></div>`:""}
-          ${!(qc.length+rdy.length+cadA.length+disp.length)?'<div class="empty">Nothing waiting on the office right now.</div>':""}
-        </div></div>
-    </div>
-    <div class="grid" style="align-content:start">
-      <div class="card"><div class="card-head"><div><h2>Most overdue</h2><div class="hint">Past the factory deadline and not ready yet.</div></div><div class="act"><button class="btn sm" data-go="followups" type="button">Follow up</button></div></div>
-        <div class="list">${over.sort((a,b)=>lateBy(b)-lateBy(a)).slice(0,7).map(o=>`<div class="row">${refBtn(o.ref)}<div class="main-t"><b>${o.factory}</b> · ${o.product}${o.priority==="Urgent"?' <span class="pill urgent">Urgent</span>':""}<div class="s">${esc(o.customer)} · due ${fmt(o.deadline)}${o.revised?" · factory now says "+fmt(o.revised):""}</div></div><span class="pill st-issue">${lateBy(o)}d late</span></div>`).join("")||'<div class="empty">Nothing overdue 🎉</div>'}</div></div>
-      <div class="card feed"><div class="card-head"><div><h2>Activity</h2><div class="hint">What the system did and what came back.</div></div></div>
-        <div class="list">${S.log.slice(0,10).map(l=>`<div class="row"><time>${l.d===S.today?l.tm:fmt(l.d)}</time><div class="main-t">${l.ref&&l.t.includes("#"+l.ref)?esc(l.t).replace("#"+l.ref,refBtn(l.ref)):esc(l.t)}</div></div>`).join("")}</div></div>
+  <div class="strip">${GROUPS.map(g=>{const c=S.orders.filter(o=>g.s.includes(o.status)).length;return `<button data-go="orders" type="button"><div class="n">${c}</div><div class="l"><span class="st ${g.k}"><i></i></span>${g.l}</div><div class="s">${g.h}</div></button>`;}).join("")}</div>
+  <div class="cols">
+    <div class="card" id="todo"><div class="card-t"><h2>To do</h2><span class="tag soft">${n}</span></div>
+      <div class="rows">${rows.join("")||'<div class="empty"><span class="ic">✨</span>All done for today. Press <b>Next day</b> to move on.</div>'}</div></div>
+    <div class="grid">
+      <div class="card"><div class="card-t"><h2>Running late</h2>${late.length?`<span class="tag late">${late.length}</span>`:""}</div>
+        <div class="rows">${late.slice(0,6).map(o=>`<div class="r-item"><div class="r-body"><b>${refBtn(o.ref)} · ${o.factory}</b><div class="s">${esc(o.customer)} · ${o.product}${o.revised?" · factory says "+fmt(o.revised):""}</div></div><span class="tag late">${lateBy(o)}d late</span></div>`).join("")||'<div class="empty">Nothing late 🎉</div>'}</div>
+        ${late.length>6?`<button class="btn link" data-go="orders:late" type="button">See all ${late.length} →</button>`:""}</div>
+      <div class="card"><div class="card-t"><h2>Latest updates</h2></div>
+        <div class="rows">${S.log.slice(0,5).map(l=>`<div class="r-item"><div class="r-body small">${l.ref&&l.t.includes("#"+l.ref)?esc(l.t).replace("#"+l.ref,refBtn(l.ref)):esc(l.t)}<div class="s">${l.d===S.today?"Today "+l.tm:fmt(l.d)}</div></div></div>`).join("")}</div></div>
     </div>
   </div>`;
 }
 
-let oTab="active",oFilter={q:"",factory:"",status:"",priority:""},oSort={k:"deadline",dir:1};
-function filteredOrders(){
-  let os=S.orders.slice();
-  if(oTab==="active")os=os.filter(o=>!CLOSED.includes(o.status));
-  if(oTab==="done")os=os.filter(o=>CLOSED.includes(o.status));
-  const f=oFilter;
-  if(f.factory)os=os.filter(o=>o.factory===f.factory);
-  if(f.priority)os=os.filter(o=>o.priority===f.priority);
-  if(f.status==="overdue")os=os.filter(isOver);
-  else if(f.status==="issues")os=os.filter(o=>o.status==="Repair"||o.status==="Wrong Order"||o.issues.some(i=>i.type!=="Cancelled"));
-  else if(f.status)os=os.filter(o=>o.status===f.status);
-  if(f.q){const q=f.q.toLowerCase();os=os.filter(o=>[o.ref,o.customer,o.factory,o.product,o.remarks,o.size,o.purity,o.status].join(" ").toLowerCase().includes(q));}
-  const k=oSort.k;
-  os.sort((a,b)=>{let x=a[k]??"",y=b[k]??"";if(k==="days"){x=daysLeft(a)??999;y=daysLeft(b)??999;}if(k==="ref"){x=+a.ref.slice(1);y=+b.ref.slice(1);}return (x>y?1:x<y?-1:0)*oSort.dir;});
+/* Orders */
+let oMode="board",oQ="",oFac="",oQuick="",oDone=false;
+function ordersFiltered(includeDone){
+  let os=S.orders.filter(o=>includeDone?true:!CLOSED.includes(o.status));
+  if(oFac)os=os.filter(o=>o.factory===oFac);
+  if(oQuick==="late")os=os.filter(isOver);
+  if(oQuick==="urgent")os=os.filter(o=>o.priority==="Urgent");
+  if(oQ){const q=oQ.toLowerCase();os=os.filter(o=>[o.ref,o.customer,o.factory,o.product,o.remarks,o.purity].join(" ").toLowerCase().includes(q));}
   return os;
 }
+function dueCell(o){
+  if(CLOSED.includes(o.status)||!o.deadline||!WITH_FACTORY.includes(o.status))return `<span>${o.deadline?"due "+fmt(o.deadline):""}</span>`;
+  const lb=lateBy(o);
+  if(lb>0)return `<span class="late">${lb}d late</span>`;
+  if(lb>=-2)return `<span class="soon">due ${lb===0?"today":fmt(dueDate(o))}</span>`;
+  return `<span>due ${fmt(dueDate(o))}</span>`;
+}
 function renderOrders(){
-  const os=filteredOrders();
-  const sts=["Enquiry","Awaiting Factory","CAD Making","CAD Approval","In Production","Ready at Factory","At Office · QC","Dispatched","Repair","Wrong Order","Completed","Cancelled"];
-  const cols=[["ref","Ref"],["date","Order Date"],["customer","Customer Name"],["factory","Factory"],["deadline","Factory Deadline"],["status","Status"],["product","Product"],["days","Days Remain"],["priority","Priority"],["remarks","Remarks"],["size","Size"],["purity","Purity"],["design","Design"]];
-  const el=$("#v-orders");
   const keep=document.activeElement&&document.activeElement.id==="oq";
-  el.innerHTML=`<div class="toolbar">
-    <div class="tabs">${[["active","Active"],["done","Completed"],["all","All"]].map(([k,l])=>`<button class="${oTab===k?"on":""}" data-otab="${k}" type="button">${l}</button>`).join("")}</div>
-    <input id="oq" type="search" placeholder="Search ref, customer, remarks…" value="${esc(oFilter.q)}" aria-label="Search orders">
-    <select id="of" aria-label="Factory"><option value="">All factories</option>${FACTORIES.map(f=>`<option ${oFilter.factory===f.name?"selected":""}>${f.name}</option>`).join("")}</select>
-    <select id="os" aria-label="Status"><option value="">Any status</option><option value="overdue" ${oFilter.status==="overdue"?"selected":""}>Overdue</option><option value="issues" ${oFilter.status==="issues"?"selected":""}>Had repair / wrong order</option>${sts.map(s=>`<option value="${s}" ${oFilter.status===s?"selected":""}>${STAGE_LBL[s]||s}</option>`).join("")}</select>
-    <select id="op" aria-label="Priority"><option value="">Any priority</option><option ${oFilter.priority==="Urgent"?"selected":""}>Urgent</option><option ${oFilter.priority==="Default"?"selected":""}>Default</option></select>
-    <span class="muted small">${os.length} order${os.length===1?"":"s"}</span>
-    <button class="btn sm" id="csv" type="button" style="margin-left:auto">Export CSV for Sheets</button>
-  </div>
-  <div class="tbl-wrap"><table><thead><tr>${cols.map(([k,l])=>`<th data-sort="${k}">${l}${oSort.k===k?(oSort.dir>0?" ▲":" ▼"):""}</th>`).join("")}</tr></thead><tbody>
-  ${os.map(o=>{const dl=daysLeft(o);const over=isOver(o);const soon=!over&&dl!=null&&dl<=2&&!CLOSED.includes(o.status)&&WITH_FACTORY.includes(o.status);
-    const dcls=over?"dl-over":soon?"dl-soon":(o.priority==="Urgent"&&!CLOSED.includes(o.status)?"dl-urgent":"");
-    return `<tr data-open="${o.ref}"><td><span class="ref">${o.ref}</span></td><td>${fmt(o.date)}</td><td>${esc(o.customer)}</td><td>${esc(o.factory||"–")}</td><td class="${dcls}">${fmt(o.deadline)}${o.revised&&!CLOSED.includes(o.status)?` <span class="muted small">→ ${fmt(o.revised)}</span>`:""}</td><td>${pill(o.status)}</td><td>${o.product}</td><td class="num">${CLOSED.includes(o.status)||dl==null?"":dl}</td><td>${o.priority==="Urgent"?'<span class="pill urgent">Urgent</span>':"Default"}</td><td class="rem">${esc(o.remarks)}</td><td>${esc(o.size)}</td><td>${o.purity}</td><td>${o.design==="Custom"?'<span class="pill custom">Custom</span>':'<span class="pill cat">Catalogue</span>'}</td></tr>`;}).join("")}
-  </tbody></table>${!os.length?'<div class="empty">No orders match.</div>':""}</div>
-  <div class="legend"><span><i style="background:var(--bad-bg);border:1px solid var(--bad)"></i>Past factory deadline</span><span><i style="background:#fbf1cf;border:1px solid #d9b44a"></i>Due today or within 2 days</span><span><i style="background:var(--urgent-bg);border:1px solid var(--wine-3)"></i>Urgent, not overdue</span><span class="muted">Same colour rules as the Settings Keys tab. “→ date” is the factory's revised date.</span></div>`;
+  const os=ordersFiltered(oMode==="list"&&oDone);
+  const tb=`<div class="toolbar">
+    <input class="search" id="oq" type="search" placeholder="Search order, customer, product…" value="${esc(oQ)}" aria-label="Search orders">
+    <select class="sel" id="ofac" aria-label="Factory"><option value="">All factories</option>${FACTORIES.map(f=>`<option ${oFac===f.name?"selected":""}>${f.name}</option>`).join("")}</select>
+    <button class="chip ${oQuick==="late"?"on":""}" data-quick="late" type="button">Running late</button>
+    <button class="chip ${oQuick==="urgent"?"on":""}" data-quick="urgent" type="button">Urgent</button>
+    ${oMode==="list"?`<button class="chip ${oDone?"on":""}" id="oDone" type="button">Include delivered</button>`:""}
+    <span class="muted small" style="margin-left:auto">${os.length} order${os.length===1?"":"s"}</span>
+  </div>`;
+  let body;
+  if(oMode==="board"){
+    body=`<div class="board">${GROUPS.map(g=>{const cs=os.filter(o=>g.s.includes(o.status)).sort((a,b)=>(lateBy(b)||0)-(lateBy(a)||0)||(a.priority==="Urgent"?-1:1));
+      return `<div class="col"><div class="col-h"><span class="st ${g.k}"><i></i>${g.l}</span><span class="c">${cs.length}</span></div><div class="col-b">${cs.map(o=>`<button class="oc" data-open="${o.ref}" type="button">
+        <div class="t"><span class="ref">#${o.ref}</span>${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}${isIssueS(o.status)?`<span class="tag late">${o.status==="Repair"?"Repair":"Remake"}</span>`:""}${o.design==="Custom"&&g.k==="new"?'<span class="tag new">New design</span>':""}</div>
+        <div class="c">${esc(o.customer)}</div><div class="i">${item(o)}</div>
+        <div class="f"><span>${esc(o.factory||"No factory yet")}</span>${dueCell(o)}</div></button>`).join("")||'<div class="empty">Nothing here</div>'}</div></div>`;}).join("")}</div>`;
+  } else {
+    const sorted=os.slice().sort((a,b)=>CLOSED.includes(a.status)-CLOSED.includes(b.status)||(lateBy(b)||-99)-(lateBy(a)||-99));
+    body=`<div class="tbl"><table><thead><tr><th>Order</th><th>Customer</th><th>Item</th><th>Factory</th><th>Due</th><th>Status</th></tr></thead><tbody>
+      ${sorted.map(o=>`<tr data-open="${o.ref}"><td><span class="ref">#${o.ref}</span> ${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}</td><td>${esc(o.customer)}</td><td>${item(o)}</td><td>${esc(o.factory||"–")}</td><td>${dueCell(o)}</td><td>${status(o.status)}</td></tr>`).join("")}
+      </tbody></table>${!sorted.length?'<div class="empty">No orders match.</div>':""}</div>`;
+  }
+  $("#v-orders").innerHTML=`<div class="page-head"><div><h1>Orders</h1><p>Every order keeps one number from the first message to delivery.</p></div>
+    <div class="right"><div class="seg"><button class="${oMode==="board"?"on":""}" data-omode="board" type="button">Board</button><button class="${oMode==="list"?"on":""}" data-omode="list" type="button">List</button></div><button class="btn sm" id="csv" type="button">Export to Sheets</button></div></div>${tb}${body}`;
   if(keep){const i=$("#oq");i.focus();i.setSelectionRange(i.value.length,i.value.length);}
 }
 
-function renderBot(){
-  const id=S.bot.cur,c=conv(id),P=PERSONAS.find(p=>p.id===id);
-  if(!c.msgs.length){bpush(id,{from:"bot",text:fill(TX[c.lang].hi,{name:P.contact})});save();}
-  const myOpen=active().filter(o=>o.customer===P.cust);
-  const sRef=(myOpen.find(o=>o.status==="In Production")||myOpen[0]||{}).ref;
-  const SAMPLES=[["EN","Hi, need a 22KT ring, size 16, around 5 gm, single stone like T22-RG-207. Urgent please"],
-    ["HINGLISH","Bhai ek 18KT bracelet chahiye 7.5 inch, 16 gram, green stone wala. Naya design hai, photo bhej raha hu"],
-    ["HINDI","मुझे 22 कैरेट का मंगलसूत्र चाहिए, 18 इंच, लगभग 10 ग्राम, 2 पीस"],
-    ["HINGLISH","Pendant chahiye 'P' letter wala, jaldi"]];
-  if(sRef)SAMPLES.push(["STATUS",`${sRef} ka status kya hai?`]);
-  const d=c.draft||{};const fld=(k,l,v)=>`<div class="field ${v?"got":"miss"}"><span>${l}</span><b>${v?esc(v):"not given yet"}</b></div>`;
-  const last=S.orders.filter(o=>o.src==="WhatsApp bot"&&o.customer===P.cust).slice(-1)[0];
-  $("#v-bot").innerHTML=`<div class="chat-layout">
-   <div>
-    <div class="toolbar"><label class="small muted" for="persona">Chatting as</label><select id="persona" class="sel">${PERSONAS.map(p=>`<option value="${p.id}" ${p.id===id?"selected":""}>${p.name}, ${p.city}</option>`).join("")}</select><button class="btn sm ghost" id="clearChat" type="button">Clear chat</button></div>
-    <div class="phone"><div class="scr">
-      <div class="wa-head"><div class="av"><img src="img/mono-light.png" alt=""></div><div><b>Touch22 Orders ✓</b><span>Business account · replies instantly</span></div></div>
-      <div class="msgs" id="botMsgs"></div>
-      <form class="compose" id="botForm"><button class="att" type="button" id="botPhoto" title="Send a design photo" aria-label="Send a design photo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.5 12.6 21a6 6 0 0 1-8.5-8.5l8.5-8.4a4 4 0 0 1 5.7 5.6l-8.5 8.5a2 2 0 0 1-2.8-2.8l7.8-7.8"/></svg></button><input id="botIn" autocomplete="off" placeholder="Type as the retailer…" aria-label="Message"><button class="send" type="submit" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5 21 12 3 3.5 3 10l12 2-12 2z"/></svg></button></form>
-    </div></div>
-   </div>
-   <div class="grid" style="align-content:start">
-    <div class="card"><h2>Try a message</h2><div class="hint">Tap one to send it, or type your own in any of the three languages. The bot asks only for what's missing.</div>
-      <div class="samples">${SAMPLES.map(([l,t])=>`<button data-sample="${esc(t)}" type="button"><em>${l}</em>${esc(t)}</button>`).join("")}</div></div>
-    <div class="card"><div class="card-head"><div><h2>What the bot understood</h2><div class="hint">Filled live from the chat. These are the same fields as the Google Form.</div></div><div class="act"><span class="pill lang">${LANG_NAME[c.lang]}</span></div></div>
-      <div class="fields">${fld("p","Product",d.product&&(PRODUCT_LABEL[d.product]||d.product))}${fld("u","Purity",d.purity)}${fld("w","Weight",d.weight&&d.weight+" g")}${fld("s","Size",d.size||(d.product&&!SIZED.includes(d.product)?"not needed":""))}${fld("q","Quantity",d.product?String(d.qty||1):"")}${fld("d","Design",d.design&&(d.design==="Custom"?"New design → CAD":"Catalogue"+(d.code?" "+d.code:"")))}${fld("r","Remarks",d.remarks)}${fld("y","Priority",d.product?(d.priority||"Default"):"")}</div>
-      ${c.await&&c.await!=="confirm"&&c.await!=="edit"?`<p class="small muted" style="margin-top:10px">Waiting for: <b>${c.await}</b></p>`:""}
-    </div>
-    ${last?`<div class="card"><div class="card-head"><div><h2>Latest order from this chat</h2><div class="hint">Created automatically, numbered and routed.</div></div><div class="act">${refBtn(last.ref)}</div></div>
-      <div class="facts" style="margin-bottom:12px"><div><span>Status</span><b>${STAGE_LBL[last.status]||last.status}</b></div><div><span>Factory</span><b>${last.factory||"to pick"}</b></div><div><span>Deadline</span><b>${fmt(dueDate(last))}</b></div></div>
-      ${last.route?`<p class="small" style="margin-bottom:10px">Routing: <b>${last.route.f}</b>${last.route.conf==="high"?" (clear choice, sent automatically)":" (close call, team picks)"}: ${esc(last.route.why.join(", "))}.</p>`:""}
-      ${last.factory?`<div class="small muted" style="margin-bottom:6px">Message sent to ${last.factory}:</div><pre class="wa">${wa(factoryMsg(last))}</pre>`:""}</div>`:""}
-   </div></div>`;
-  renderBotMsgs();
+/* Chats */
+let cMode="r",cId="parekh",cFac="Mars",cRef="",cOpen=false;
+function renderBot(){if(view==="chats")renderChats();}
+function msgHTML(m,i,kind){
+  if(m.from==="sys")return `<div class="m sys">${esc(m.text)}</div>`;
+  const out=kind==="r"?m.from==="me":m.from==="t22";
+  const sum=m.card?`<div class="sum">${m.card.map(([k,v])=>`<span>${esc(k)}</span><b>${esc(v)}</b>`).join("")}</div>`:"";
+  const btns=m.btns?`<div class="btns">${m.btns.map(b=>`<button type="button" data-bb="${i}" data-a="${b.a}" data-ref="${b.ref||""}" ${m.used?"disabled":""}>${esc(b.l)}</button>`).join("")}</div>`:"";
+  const who=kind==="f"&&m.from==="fac"?`<span class="who">${esc(cFac)}</span>`:"";
+  const rf=kind==="f"&&m.ref?`<button class="rf" data-open="${m.ref}" type="button">#${m.ref}</button><br>`:"";
+  return `<div class="m ${out?"out":""}">${who}${rf}${m.art?art(m.art.p,m.art.cad):""}${wa(m.text)}${sum}<span class="tm">${m.tm}${out?" ✓✓":""}</span>${btns}</div>`;
 }
+function withDays(list,fn){let d="";return list.map((m,i)=>{let h="";if(m.d!==d){d=m.d;h=`<div class="m day">${fmtL(m.d)}</div>`;}return h+fn(m,i);}).join("");}
 function renderBotMsgs(typing){
-  const box=$("#botMsgs");if(!box)return;const id=S.bot.cur,c=conv(id);
-  let lastD="";
-  box.innerHTML=c.msgs.map((m,i)=>{
-    let h="";if(m.d!==lastD){lastD=m.d;h+=`<div class="m day">${fmtL(m.d)}</div>`;}
-    const card=m.card?`<div class="card-in"><table>${m.card.map(([k,v])=>`<tr><td>${esc(k)}</td><td><b>${esc(v)}</b></td></tr>`).join("")}</table></div>`:"";
-    const btns=m.btns?`<div class="btns">${m.btns.map(b=>`<button type="button" data-bb="${i}" data-a="${b.a}" data-ref="${b.ref||""}" ${m.used?"disabled":""}>${esc(b.l)}</button>`).join("")}</div>`:"";
-    return h+`<div class="m ${m.from==="me"?"out":""}">${m.art?art(m.art.p,m.art.cad):""}${wa(m.text)}${card}<span class="t">${m.tm}${m.from==="me"?" ✓✓":""}</span>${btns}</div>`;
-  }).join("")+((typing||botBusy)?'<div class="typing"><i></i><i></i><i></i></div>':"");
+  if(view!=="chats"||cMode!=="r")return;const box=$("#msgs");if(!box)return;
+  const c=conv(cId);
+  box.innerHTML=withDays(c.msgs,(m,i)=>msgHTML(m,i,"r"))+((typing||botBusy)?'<div class="typing"><i></i><i></i><i></i></div>':"");
   box.scrollTop=box.scrollHeight;
 }
-
-let facCur="Mars",facRef="";
-function renderFac(){
-  const list=FACTORIES.map(f=>{const os=active().filter(o=>o.factory===f.name);const ch=S.fchat[f.name]||[];const lm=ch[ch.length-1];
-    return {f,os,lm};});
-  const cur=list.find(x=>x.f.name===facCur);
-  const ch=(S.fchat[facCur]||[]);
-  const refs=[...new Set(cur.os.map(o=>o.ref))];
-  const shown=facRef?ch.filter(m=>m.ref===facRef||(m.refs||[]).includes(facRef)):ch.slice(-60);
-  const pend=cur.os.filter(o=>WITH_FACTORY.includes(o.status));
-  const sel=facRef&&pend.find(o=>o.ref===facRef)?facRef:(pend[pend.length-1]||{}).ref;
-  const so=sel&&byRef(sel);
-  const qb=so?(so.status==="Awaiting Factory"?[["accept","✅ OK, accept"],["acceptLate","📅 OK, +3 days"],["reject","❌ Can't make"]]:
-    so.status==="CAD Making"?[["cad","✏️ Send CAD"]]:[["ready","✅ Ready"],["delay","⏳ 3 days delay"],["ontrack","👍 On track"]]):[];
-  let lastD="";
-  $("#v-factories").innerHTML=`<div class="fac-layout">
-   <div class="fac-list">${list.map(({f,os,lm})=>`<button class="${f.name===facCur?"on":""}" data-fac="${f.name}" type="button"><span class="av">${f.name[0]}</span><span class="nm"><b>${f.name}</b><span>${os.length} open · ${lm?esc((lm.from==="fac"?"":"You: ")+lm.text.replace(/\*/g,"").split("\n")[0]).slice(0,34):"no messages"}</span></span></button>`).join("")}</div>
-   <div class="fac-chat">
-     <div class="wa-head"><div class="av" style="background:var(--wine-2);color:var(--gold);font-family:var(--f-head)">${facCur[0]}</div><div><b>${facCur} · Touch22 orders</b><span>${FAC[facCur].cats.join(", ")} · ${FAC[facCur].pur.join(", ")}</span></div></div>
-     <div class="refbar"><span class="small muted">Filter by order:</span><button class="ref ${!facRef?"on":""}" data-fref="" type="button">All</button>${refs.map(r=>`<button class="ref ${facRef===r?"on":""}" data-fref="${r}" type="button">#${r}</button>`).join("")}</div>
-     <div class="msgs" id="facMsgs">${shown.map(m=>{let h="";if(m.d!==lastD){lastD=m.d;h=`<div class="m day">${fmtL(m.d)}</div>`;}
-        if(m.from==="sys")return h+`<div class="m sys">${esc(m.text)}</div>`;
-        return h+`<div class="m ${m.from==="t22"?"out":""}">${m.from==="fac"?`<span class="who">${facCur}</span>`:""}${m.ref?`<span class="tag">${refBtn(m.ref)}</span><br>`:""}${m.art?art(m.art.p,m.art.cad):""}${wa(m.text)}<span class="t">${m.tm}${m.from==="t22"?" ✓✓":""}</span></div>`;}).join("")||'<div class="m sys">No messages yet.</div>'}</div>
-     <div class="simbar">
-       <div class="r1"><label>Play the factory:</label>${pend.length?`<select class="sel" id="simRef">${pend.map(o=>`<option value="${o.ref}" ${o.ref===sel?"selected":""}>#${o.ref} · ${STAGE_LBL[o.status]||o.status}</option>`).join("")}</select>${qb.map(([k,l])=>`<button class="btn sm" data-sim="${k}" type="button">${l}</button>`).join("")}`:'<span class="small muted">No open orders waiting on this factory.</span>'}</div>
-       <form class="r1" id="facForm" style="flex-wrap:nowrap"><input id="facIn" class="sel" style="flex:1;min-width:0;border-radius:999px;padding:8px 14px" placeholder="Or type a reply as ${facCur}, e.g. “${sel||"T430"} ready” or “${sel||"T430"} 3 din”" autocomplete="off"><button class="btn sm primary" type="submit">Send</button></form>
-     </div>
-   </div></div>`;
-  const b=$("#facMsgs");if(b)b.scrollTop=b.scrollHeight;
+function renderChats(){
+  const P=PERSONAS.find(p=>p.id===cId);
+  if(cMode==="r"){const c=conv(cId);if(!c.msgs.length){bpush(cId,{from:"bot",text:fill(TX[c.lang].hi,{name:P.contact})});save();}}
+  const list=cMode==="r"?PERSONAS.map(p=>{const c=S.bot.convs[p.id];const lm=c&&c.msgs[c.msgs.length-1];
+      return `<button class="c-item ${p.id===cId?"on":""}" data-chat="${p.id}" type="button"><span class="av">${p.name.split(" ").map(w=>w[0]).join("").slice(0,2)}</span><span class="nm"><b>${p.name}</b><span>${lm?esc(lm.text.replace(/\*/g,"").split("\n")[0]):p.city+" · "+LANG_NAME[p.lang]}</span></span></button>`;}).join("")
+    :FACTORIES.map(f=>{const n=active().filter(o=>o.factory===f.name).length;const ch=S.fchat[f.name]||[];const lm=ch[ch.length-1];
+      return `<button class="c-item ${f.name===cFac?"on":""}" data-chat="${f.name}" type="button"><span class="av f">${f.name[0]}</span><span class="nm"><b>${f.name}</b><span>${lm?esc(lm.text.replace(/\*/g,"").split("\n")[0]):"No messages yet"}</span></span><span class="cnt">${n} open</span></button>`;}).join("");
+  let head,msgs,foot;
+  if(cMode==="r"){
+    const myOpen=active().filter(o=>o.customer===P.cust);
+    const sRef=(myOpen.find(o=>o.status==="In Production")||myOpen[0]||{}).ref;
+    const SAMPLES=[["English order","Hi, need a 22KT ring, size 16, around 5 gm, single stone like T22-RG-207. Urgent please"],
+      ["Hinglish order","Bhai ek 18KT bracelet chahiye 7.5 inch, 16 gram, green stone wala. Naya design hai, photo bhej raha hu"],
+      ["हिंदी order","मुझे 22 कैरेट का मंगलसूत्र चाहिए, 18 इंच, लगभग 10 ग्राम, 2 पीस"]];
+    if(sRef)SAMPLES.push(["Ask status",`${sRef} ka status kya hai?`]);
+    head=`<span class="av"><img src="img/mono-light.png" alt=""></span><div><b>${P.name}</b><span>${P.city} · talking to the Touch22 order bot</span></div><div class="r"><button class="btn link" id="clearChat" type="button">Clear</button></div>`;
+    msgs=withDays(conv(cId).msgs,(m,i)=>msgHTML(m,i,"r"));
+    foot=`<div class="chips"><span class="lbl">Try:</span>${SAMPLES.map(([l,t])=>`<button class="chip" data-sample="${esc(t)}" type="button" title="${esc(t)}">${l}</button>`).join("")}</div>
+      <form class="compose" id="botForm"><button class="att" type="button" id="botPhoto" title="Send a design photo" aria-label="Send a design photo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.5 12.6 21a6 6 0 0 1-8.5-8.5l8.5-8.4a4 4 0 0 1 5.7 5.6l-8.5 8.5a2 2 0 0 1-2.8-2.8l7.8-7.8"/></svg></button><input id="botIn" autocomplete="off" placeholder="Type as ${esc(P.name)} (English, हिंदी or Hinglish)…" aria-label="Message"><button class="send" type="submit" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5 21 12 3 3.5 3 10l12 2-12 2z"/></svg></button></form>`;
+  } else {
+    const os=active().filter(o=>o.factory===cFac);
+    const pend=os.filter(o=>WITH_FACTORY.includes(o.status));
+    const ch=S.fchat[cFac]||[];
+    const shown=cRef?ch.filter(m=>m.ref===cRef||(m.refs||[]).includes(cRef)):ch.slice(-50);
+    const sel=pend.find(o=>o.ref===cRef)?cRef:(pend[pend.length-1]||{}).ref;
+    const so=sel&&byRef(sel);
+    const qb=so?(so.status==="Awaiting Factory"?[["accept","✅ Accept"],["acceptLate","📅 Accept, 3 days later"],["reject","❌ Can't make"]]:so.status==="CAD Making"?[["cad","✏️ Send CAD"]]:[["ready","✅ Ready"],["delay","⏳ 3 days late"],["ontrack","👍 On track"]]):[];
+    head=`<span class="av f">${cFac[0]}</span><div><b>${cFac}</b><span>${FAC[cFac].cats.join(", ")} · ${os.length} open orders</span></div><div class="r"><select class="sel" id="cRef" aria-label="Show one order"><option value="">All orders</option>${os.map(o=>`<option value="${o.ref}" ${cRef===o.ref?"selected":""}>#${o.ref} only</option>`).join("")}</select></div>`;
+    msgs=withDays(shown,(m,i)=>msgHTML(m,i,"f"))||'<div class="m sys">No messages yet.</div>';
+    foot=(pend.length?`<div class="chips"><span class="lbl">Reply as ${cFac} for</span><select class="sel" id="simRef">${pend.map(o=>`<option value="${o.ref}" ${o.ref===sel?"selected":""}>#${o.ref}</option>`).join("")}</select>${qb.map(([k,l])=>`<button class="chip" data-sim="${k}" type="button">${l}</button>`).join("")}</div>`:"")+
+      `<form class="compose" id="facForm"><input id="facIn" autocomplete="off" placeholder="Or type as ${cFac}, e.g. “${sel||"T430"} ready” or “${sel||"T430"} 3 din”" aria-label="Factory reply"><button class="send" type="submit" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5 21 12 3 3.5 3 10l12 2-12 2z"/></svg></button></form>`;
+  }
+  $("#v-chats").innerHTML=`<div class="page-head"><div><h1>Chats</h1><p>WhatsApp, simulated. Retailers order with the bot; each factory gets one clear, numbered message per order.</p></div></div>
+  <div class="chat-wrap ${cOpen?"open":""}">
+    <div class="c-list"><div class="seg"><button class="${cMode==="r"?"on":""}" data-cmode="r" type="button">Retailers</button><button class="${cMode==="f"?"on":""}" data-cmode="f" type="button">Factories</button></div><div class="c-items">${list}</div></div>
+    <div class="c-main"><div class="c-head"><button class="icon-btn c-back" id="cBack" type="button" aria-label="Back">←</button>${head}</div><div class="msgs" id="msgs">${msgs}</div><div class="c-foot">${foot}</div></div>
+  </div>`;
+  if(cMode==="r")renderBotMsgs();else{const b=$("#msgs");b.scrollTop=b.scrollHeight;}
 }
 
-function renderFollow(){
-  const due=followDue();
-  const by={};due.forEach(o=>(by[o.factory]=by[o.factory]||[]).push(o));
-  const sentToday=S.orders.filter(o=>o.lastFollow===S.today&&!CLOSED.includes(o.status));
-  $("#v-followups").innerHTML=`<div class="grid g-3-2">
-   <div class="grid" style="align-content:start">
-    <div class="card"><div class="card-head"><div><h2>Due today · ${due.length}</h2><div class="hint">Grouped by factory. Each factory gets <b>one</b> message listing its orders by number, so replies never get mixed up.</div></div>
-      <div class="act">${due.length?`<button class="btn primary" id="sendAll" type="button">Send all ${due.length} follow-ups</button>`:""}</div></div>
-      ${Object.keys(by).length?Object.entries(by).map(([f,os])=>`<div style="margin-top:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><b>${f}</b><span class="muted small">${os.length} order${os.length>1?"s":""}</span><button class="btn sm" style="margin-left:auto" data-fu="${f}" type="button">Send to ${f}</button></div>
-        <div class="list">${os.map(o=>`<div class="row">${refBtn(o.ref)}<div class="main-t">${o.product} ${o.purity} · ${esc(o.customer)}<div class="s">${esc(followReason(o))} · due ${fmt(dueDate(o))}${o.fu?` · ${o.fu} earlier follow-up${o.fu>1?"s":""}`:""}</div></div>${o.priority==="Urgent"?'<span class="pill urgent">Urgent</span>':""}${isOver(o)?`<span class="pill st-issue">${lateBy(o)}d late</span>`:""}</div>`).join("")}</div></div>`).join(""):`<div class="empty">All follow-ups for today are done${sentToday.length?` (${sentToday.length} sent today)`:""}. Press <b>Next day</b> at the top to move the clock.</div>`}
-    </div>
-   </div>
-   <div class="grid" style="align-content:start">
-    <div class="card"><h2>Follow-up rules</h2><div class="hint">Taken from the Settings Keys tab of the T22 Order DB.</div>
-      <div class="list small">
-        <div class="row"><span class="pill urgent">Urgent</span><div class="main-t">Every day until ready</div></div>
-        <div class="row"><span class="pill cat">Default</span><div class="main-t">Day 6, 8 and 10 from order date, then daily after day 10</div></div>
-        <div class="row"><span class="pill st-cad">Mid-way</span><div class="main-t">Halfway to the deadline, and 2 days before it</div></div>
-        <div class="row"><span class="pill st-wait">No reply</span><div class="main-t">Factory hasn't confirmed by the next day</div></div>
-        <div class="row"><span class="pill st-issue">Overdue</span><div class="main-t">Daily once past the factory deadline</div></div>
-        <div class="row"><span class="pill st-issue">Repair</span><div class="main-t">Every 2 days while a piece is back at the factory</div></div>
-      </div></div>
-    <div class="card"><h2>Automation</h2><div class="hint">Switch these off to do the step by hand.</div>
-      <label class="sw"><input type="checkbox" data-set="autoFollow" ${S.set.autoFollow?"checked":""}>Send due follow-ups automatically every morning</label>
-      <label class="sw"><input type="checkbox" data-set="autoRoute" ${S.set.autoRoute?"checked":""}>Send new orders to the suggested factory when it's a clear choice</label>
-      <label class="sw"><input type="checkbox" data-set="simFactory" ${S.set.simFactory?"checked":""}>Simulate factory replies (demo only)</label>
-    </div>
-    ${due.length?`<div class="card"><h2>Preview</h2><div class="hint">What ${Object.keys(by)[0]} receives.</div><pre class="wa">${wa(["*TOUCH22 FOLLOW-UP · "+fmt(S.today)+"*","Status please, "+by[Object.keys(by)[0]].length+" order(s):",...by[Object.keys(by)[0]].slice(0,6).map((o,i)=>`${i+1}. *#${o.ref}* ${o.product} ${o.purity} · due ${fmt(o.deadline)}`),by[Object.keys(by)[0]].length>6?"…":"","Reply per order, e.g. *"+by[Object.keys(by)[0]][0].ref+" ready*"].join("\n"))}</pre></div>`:""}
-   </div></div>`;
-}
-
-function bar(segs,total,label){
-  return `<div class="track ${total?"":"bg"}">${segs.filter(s=>s.v>0).map(s=>`<i style="width:${(s.v/total*100).toFixed(2)}%;background:${s.c}" data-tip="${esc(label?label+" · ":"")}${esc(s.l)}: ${s.v}${s.p!=null?" ("+s.p+")":""}"></i>`).join("")}</div>`;
-}
-function renderInsights(){
+/* Reports */
+function renderReports(){
   const st=FACTORIES.map(f=>facStats(f.name)).filter(s=>s.total).sort((a,b)=>b.total-a.total);
   const fromD=S.orders.reduce((m,o)=>o.date<m?o.date:m,S.today);
-  const rating=s=>s.done<3?['<span class="score muted">Too few orders</span>']:s.onTime>=.75&&s.issueRate<.1?[`<span class="score" style="color:var(--ok)">● Reliable</span>`]:s.onTime>=.55?[`<span class="score" style="color:var(--warn)">▲ Watch</span>`]:[`<span class="score" style="color:var(--bad)">■ Often late</span>`];
-  // custom vs catalogue by category
+  const rate=s=>s.done<3?["soft","New"]:s.onTime>=.75&&s.issueRate<.1?["good","Reliable"]:s.onTime>=.55?["watch","Watch"]:["bad","Often late"];
+  const col={good:"var(--ok)",watch:"var(--warn)",bad:"var(--bad)",soft:"var(--line-2)"};
   const cats=PRODUCTS.map(p=>{const os=S.orders.filter(o=>o.product===p);const c=os.filter(o=>o.design==="Custom").length;return {p,n:os.length,c,k:os.length-c,share:os.length?c/os.length:0};}).filter(x=>x.n).sort((a,b)=>b.share-a.share);
-  const THEMES=[["Names & letters",/name|letter|'[A-Z]'|"[A-Z]"/i],["Coloured stones",/red stone|green stone|stone colour|green|red/i],["Evil eye",/evil|eveil|nazar/i],["Religious symbols (OM)",/\bom\b|om symbol|OM/],["Rose / white gold finish",/rose gold|white gold/i],["Special settings & work",/channel|jaguar|meena|chappai|jhali|bulgari|press chain|heart/i]];
+  const THEMES=[["Names & letters",/name|letter|'[A-Z]'|"[A-Z]"/i],["Coloured stones",/red stone|green stone|green|red/i],["Evil eye",/evil|nazar/i],["OM / religious",/\bom\b|OM/],["Rose / white gold",/rose gold|white gold/i],["Special settings",/channel|jaguar|meena|chappai|jhali|bulgari|press chain|heart/i]];
   const cust=S.orders.filter(o=>o.design==="Custom");
   const th=THEMES.map(([l,rx])=>({l,n:cust.filter(o=>rx.test(o.remarks)).length})).sort((a,b)=>b.n-a.n);
   const thMax=Math.max(...th.map(t=>t.n),1);
-  const top=cats[0];const topTheme=th[0];
-  const cadDays=(()=>{const xs=S.orders.filter(o=>o.design==="Custom"&&o.hist.some(h=>/CAD shared/.test(h.t))&&o.hist.some(h=>/approved CAD/.test(h.t))).map(o=>diff(o.hist.find(h=>/approved CAD/.test(h.t)).d,o.date));return xs.length?(xs.reduce((a,b)=>a+b,0)/xs.length).toFixed(1):"–";})();
-  const best=st.filter(s=>s.done>=3).sort((a,b)=>b.onTime-a.onTime)[0];
+  const best=st.filter(s=>s.done>=5).sort((a,b)=>b.onTime-a.onTime)[0];
   const mars=st.find(s=>s.name==="Mars");
-  $("#v-insights").innerHTML=`
-  <div class="grid g-2" style="margin-bottom:16px">
-    <div class="callout">Most orders go to <b>Mars</b> (${mars?mars.total:0} of ${S.orders.length}), but only <b>${mars?pct(mars.onTime):"–"}</b> of its pieces are ready by the deadline, against <b>${best?pct(best.onTime):"–"}</b> at ${best?best.name:"the best factory"}. Moving urgent rings to ${best?best.name:"faster factories"} would cut the overdue list.</div>
-    <div class="callout"><b>${top?top.p+"s":""}</b> go custom ${top?pct(top.share):""} of the time, and the top custom request is <b>${topTheme.l.toLowerCase()}</b> (${topTheme.n} orders). A ready set of CAD templates for these would save about <b>${cadDays} days</b> per order spent on CAD and approval.</div>
+  const top=cats[0];
+  $("#v-reports").innerHTML=`<div class="page-head"><div><h1>Reports</h1><p>Since ${fmt(fromD)} · ${S.orders.length} orders</p></div></div>
+  <div class="two" style="margin-bottom:18px">
+    <div class="insight"><span class="k">Factories</span><b>Mars</b> gets most orders (${mars?mars.total:0} of ${S.orders.length}) but has only <b>${mars?pct(mars.onTime):"–"}</b> ready on time. ${best?`<b>${best.name}</b> is at <b>${pct(best.onTime)}</b>; giving it more urgent orders would cut the late list.`:""}</div>
+    <div class="insight"><span class="k">Custom designs</span><b>${top?(top.p==="MS"?"Mangalsutras":top.p+"s"):""}</b> go custom ${top?pct(top.share):""} of the time. The most asked-for change is <b>${th[0].l.toLowerCase()}</b> (${th[0].n} orders): a good candidate for ready-made CAD templates.</div>
   </div>
-  <div class="card" style="margin-bottom:16px"><div class="card-head"><div><h2>Factory performance</h2><div class="hint">All orders since ${fmt(fromD)}. “Ready on time” counts pieces the factory had ready by the deadline it agreed.</div></div></div>
-    <div class="bars" style="margin-bottom:14px">${st.map(s=>`<div class="bar-row"><span class="nm">${s.name}</span>${bar([{v:s.done-s.late,c:"var(--ok)",l:"On time"},{v:s.late,c:"var(--warn)",l:"Late"}],s.done,s.name)}<span class="val">${s.done?pct(s.onTime):"–"}</span></div>`).join("")}</div>
-    <div class="legend" style="margin:0 0 14px"><span><i style="background:var(--ok)"></i>Ready on time</span><span><i style="background:var(--warn)"></i>Late</span><span class="muted">Hover a bar for counts.</span></div>
-    <div class="tbl-wrap" style="max-height:none"><table><thead><tr><th>Factory</th><th>Orders given</th><th>Open now</th><th>Overdue now</th><th>Ready on time</th><th>Avg days late</th><th>Repair</th><th>Wrong order</th><th>Cancelled</th><th>Avg reply time</th><th>Rating</th></tr></thead><tbody>
-      ${st.map(s=>`<tr style="cursor:default" data-go="orders:f:${s.name}"><td><b>${s.name}</b></td><td class="num">${s.total}</td><td class="num">${s.open}</td><td class="num">${s.overdue}</td><td class="num">${s.done?pct(s.onTime):"–"}</td><td class="num">${s.late?s.avgLate.toFixed(1):"–"}</td><td class="num">${s.repair}</td><td class="num">${s.wrong}</td><td class="num">${s.cancel}</td><td class="num">${s.reply!=null?Math.round(s.reply)+" h":"–"}</td><td>${rating(s)}</td></tr>`).join("")}
-    </tbody></table></div>
+  <div class="card" style="margin-bottom:18px"><div class="card-t"><h2>Factory performance</h2><div class="sub">How often each factory has the piece ready by the date it agreed.</div></div>
+    <div class="fgrid">${st.map(s=>{const [k,l]=rate(s);return `<div class="fc"><div class="h"><b>${s.name}</b><span class="tag ${k}">${l}</span></div>
+      <div class="big">${s.done>=3?pct(s.onTime):"–"}<small>${s.done>=3?"on time":"too few finished orders"}</small></div><div class="meter"><i style="width:${s.done>=3?Math.round(s.onTime*100):0}%;background:${col[k]}"></i></div>
+      <dl><dt>Orders</dt><dd>${s.total}</dd><dt>Open now</dt><dd>${s.open}${s.overdue?` <span style="color:var(--bad)">(${s.overdue} late)</span>`:""}</dd><dt>When late, by</dt><dd>${s.late?s.avgLate.toFixed(1)+" days":"–"}</dd><dt>Repairs / remakes</dt><dd>${s.repair} / ${s.wrong}</dd><dt>Replies in</dt><dd>${s.reply!=null?"~"+Math.round(s.reply)+" h":"–"}</dd></dl></div>`;}).join("")}</div>
   </div>
-  <div class="grid g-2">
-    <div class="card"><h2>Which categories go custom</h2><div class="hint">Share of orders per category that needed a new design (CAD) vs a catalogue piece.</div>
-      <div class="bars">${cats.map(c=>`<div class="bar-row"><span class="nm">${c.p==="MS"?"MS":c.p}</span>${bar([{v:c.c,c:"var(--c-custom)",l:"New design",p:pct(c.share)},{v:c.k,c:"var(--c-cat)",l:"Catalogue",p:pct(1-c.share)}],c.n,c.p)}<span class="val">${pct(c.share)} · ${c.n}</span></div>`).join("")}</div>
-      <div class="legend"><span><i style="background:var(--c-custom)"></i>New design</span><span><i style="background:var(--c-cat)"></i>Catalogue</span><span class="muted">Right column: % custom · total orders</span></div></div>
-    <div class="card"><h2>What retailers customise</h2><div class="hint">Themes found in the remarks of ${cust.length} custom orders. Candidates for new catalogue lines.</div>
-      <div class="bars">${th.map(t=>`<div class="bar-row" style="grid-template-columns:170px 1fr 40px"><span class="nm">${t.l}</span><div class="track"><i style="width:${(t.n/thMax*100).toFixed(1)}%;background:var(--c-cat)" data-tip="${esc(t.l)}: ${t.n} orders"></i></div><span class="val">${t.n}</span></div>`).join("")}</div>
-      <p class="small muted" style="margin-top:12px">In the live system these come from the order remarks and photos the bot collects, so the list keeps itself up to date.</p></div>
+  <div class="two">
+    <div class="card"><div class="card-t"><h2>Which categories go custom</h2><div class="sub">Share of orders that needed a new design (CAD).</div></div>
+      <div class="bars">${cats.map(c=>`<div class="bar-row"><span class="nm">${c.p==="MS"?"Mangalsutra":c.p}</span><div class="track">${c.c?`<i style="width:${(c.share*100).toFixed(1)}%;background:var(--c-custom)" data-tip="${c.p}: ${c.c} new designs"></i>`:""}${c.k?`<i style="width:${((1-c.share)*100).toFixed(1)}%;background:var(--c-cat)" data-tip="${c.p}: ${c.k} catalogue"></i>`:""}</div><span class="v">${pct(c.share)} of ${c.n}</span></div>`).join("")}</div>
+      <div class="legend"><span><i style="background:var(--c-custom)"></i>New design</span><span><i style="background:var(--c-cat)"></i>Catalogue</span></div></div>
+    <div class="card"><div class="card-t"><h2>What retailers customise</h2><div class="sub">From the notes on ${cust.length} custom orders.</div></div>
+      <div class="bars">${th.map(t=>`<div class="bar-row" style="grid-template-columns:130px 1fr 36px"><span class="nm">${t.l}</span><div class="track"><i style="width:${(t.n/thMax*100).toFixed(1)}%;background:var(--c-cat)" data-tip="${esc(t.l)}: ${t.n} orders"></i></div><span class="v">${t.n}</span></div>`).join("")}</div></div>
   </div>`;
 }
 
-function renderHow(){
-  const steps=[["1","Retailer","Order on WhatsApp","Bot chats in English, Hindi or Hinglish and asks only for missing details.",1],
-   ["2","System","Order number","#T-number given the moment the retailer confirms. Used in every message after.",1],
-   ["3","System","Pick factory","Suggests the factory from product, purity, on-time record and load. Close calls go to the team.",1],
-   ["4","Factory","Confirm","Standard order message. Factory replies “T434 OK”, a date, or “NO”.",0],
-   ["5","Factory + retailer","CAD (new designs)","Factory sends CAD, bot sends it to the retailer to approve.",0],
-   ["6","Factory","Production","Deadline set. Follow-ups on day 6/8/10, mid-way and daily when late.",1],
-   ["7","Office","QC","Piece arrives. Pass → dispatch. Fail → repair or wrong order goes back with a return note.",0],
-   ["8","System","Dispatch","Retailer gets the dispatch update. Order moves to Completed.",1]];
-  const gaps=[["Many orders in the same factory WhatsApp chat","Every message to and from a factory carries the order number (#T434). The factory chat can be filtered to one order, and replies like “T434 ready” update the right order."],
-   ["No number given to an order","The number is created automatically when the retailer confirms, continuing your T-series. The retailer, factory and team all use the same number."],
-   ["Delays","Deadline set on confirmation, follow-ups sent on your day 6/8/10 rule, mid-way and daily when overdue. Late pieces show red on the dashboard and the retailer gets a new date automatically."],
-   ["Errors (size, purity, design)","The bot collects every field the Google Form has and reads the full order back for the retailer to confirm. Factories get the same fixed format every time, so nothing is lost in a long chat."],
-   ["No view of factory performance","On-time %, days late, repair and wrong-order counts and reply time per factory, built from the orders themselves."],
-   ["Not knowing which designs go custom","Custom share by category and the most requested themes (names, letters, stones, finishes), so the catalogue can grow where retailers keep asking."]];
-  $("#v-how").innerHTML=`
-  <div class="card" style="margin-bottom:16px"><h2>The order flow</h2><div class="hint">Gold cards happen automatically. White cards need a person (the factory, the retailer or the office team).</div>
-    <div class="flow">${steps.map(s=>`<div class="f ${s[4]?"auto":""}"><div class="no">${s[0]}</div><div class="who">${s[1]}</div><b>${s[2]}</b><p>${s[3]}</p></div>`).join("")}</div>
-  </div>
-  <div class="card" style="margin-bottom:16px"><h2>Gaps this closes</h2><div class="hint">From Rishita's notes on how orders run today.</div>
-    <div class="tbl-wrap" style="max-height:none"><table class="gap-tbl"><thead><tr><th style="width:30%">Today</th><th>With the order system</th></tr></thead><tbody>${gaps.map(g=>`<tr><td><b>${g[0]}</b></td><td>${g[1]}</td></tr>`).join("")}</tbody></table></div>
-  </div>
-  <div class="grid g-2">
-    <div class="card"><h2>Try the demo in 2 minutes</h2>
-      <ol class="small" style="padding-left:18px;margin:8px 0 0;line-height:1.9">
-        <li>Open <a href="#bot">Retailer bot</a> and tap the Hinglish sample. Confirm the order.</li>
-        <li>Watch the order get a number, go to a factory and get confirmed. The CAD arrives in the retailer's chat: approve it.</li>
-        <li>Open <a href="#factories">Factory chats</a> and type a reply as the factory, e.g. “T434 ready”.</li>
-        <li>On the <a href="#dashboard">Dashboard</a>, mark it received, then QC pass or send it back for repair.</li>
-        <li>Press <b>Next day</b> at the top: follow-ups go out and factories answer.</li>
-        <li>See <a href="#insights">Insights</a> for factory performance and custom designs.</li>
-      </ol></div>
-    <div class="card"><h2>To go live</h2>
-      <ul class="small" style="padding-left:18px;margin:8px 0 0;line-height:1.8">
-        <li><b>WhatsApp Business API</b> number for Touch22 (through a provider such as Interakt, AiSensy or Meta's Cloud API). Retailers message it like a normal chat.</li>
-        <li><b>Factory contacts</b>: one WhatsApp number per factory. Factories don't need an app; they reply in WhatsApp as they do now.</li>
-        <li><b>Data</b>: can keep writing to the T22 Order DB Google Sheet (same columns as today), so the team's current view keeps working.</li>
-        <li><b>Language understanding</b>: an AI model reads free-form Hindi, Hinglish and English messages and photos. The demo uses simple rules instead.</li>
-        <li><b>Privacy</b>: factory messages carry the order number, not the retailer's name.</li>
-      </ul></div>
-  </div>`;
-}
-
-/* ---------- order drawer ---------- */
+/* Order panel */
 let drawerRef=null,issueForm=null;
 function openDrawer(ref){drawerRef=ref;issueForm=null;renderDrawer();$("#drawer").classList.add("on");$("#scrim").classList.add("on");}
 function closeDrawer(){drawerRef=null;$("#drawer").classList.remove("on");$("#scrim").classList.remove("on");}
 function renderDrawer(){
   const o=byRef(drawerRef);if(!o)return closeDrawer();
-  const path=o.design==="Custom"?STAGES:STAGES.filter(s=>!s.startsWith("CAD"));
-  const issue=o.status==="Repair"||o.status==="Wrong Order";
-  let ci=path.indexOf(o.status);if(issue)ci=path.indexOf("Ready at Factory");if(o.status==="Cancelled")ci=-1;
-  const r=o.status==="Enquiry"?route(o):null;
-  const A=[];
+  const gs=GROUPS.filter(g=>g.k!=="cad"||o.design==="Custom");
+  const gi=CLOSED.includes(o.status)?gs.length:gs.indexOf(grpOf(o.status));
+  const issue=isIssueS(o.status);
+  const lb=lateBy(o);
+  const sim=l=>`<span class="small muted" style="align-self:center">Demo:</span>${l}`;
+  let q="",h="",a="";
   switch(o.status){
-    case "Enquiry":A.push(`<select class="sel" data-fsel="${o.ref}">${r.all.map(a=>`<option ${a.f===r.best.f?"selected":""}>${a.f}</option>`).join("")}</select><button class="btn primary" data-send="${o.ref}" type="button">Send to factory</button>`);break;
-    case "Awaiting Factory":A.push(`<button class="btn" data-dsim="accept" type="button">Factory accepts</button><button class="btn bad" data-dsim="reject" type="button">Factory can't make it</button>`);break;
-    case "CAD Making":A.push(`<button class="btn" data-dsim="cad" type="button">Factory sends CAD</button>`);break;
-    case "CAD Approval":A.push(`<button class="btn ok" data-act="cadApprove" data-ref="${o.ref}" type="button">Retailer approved</button><button class="btn" data-act="cadChange" data-ref="${o.ref}" type="button">Retailer wants a change</button>`);break;
-    case "In Production":case "Repair":case "Wrong Order":A.push(`<button class="btn" data-dsim="ready" type="button">Factory: ready</button><button class="btn warn" data-dsim="delay" type="button">Factory: 3 days delay</button><button class="btn" data-fu1="${o.ref}" type="button">Follow up now</button>`);break;
-    case "Ready at Factory":A.push(`<button class="btn primary" data-act="receive" data-ref="${o.ref}" type="button">Received at office</button>`);break;
-    case "At Office · QC":A.push(`<button class="btn ok" data-act="qcpass" data-ref="${o.ref}" type="button">QC pass → dispatch</button><button class="btn bad" data-issue="Repair" type="button">Repair</button><button class="btn bad" data-issue="Wrong Order" type="button">Wrong order</button>`);break;
-    case "Dispatched":A.push(`<button class="btn" data-act="delivered" data-ref="${o.ref}" type="button">Delivered to retailer</button>`);break;
+    case "Enquiry":{const r=route(o);q="Which factory should make this?";h=`Suggested: <b>${r.best.f}</b>, ${esc(r.best.why.join(", "))}.`;
+      a=`<select class="sel" data-fsel="${o.ref}" aria-label="Factory">${r.all.map(x=>`<option ${x.f===r.best.f?"selected":""}>${x.f}</option>`).join("")}</select><button class="btn primary" data-send="${o.ref}" type="button">Send to factory</button>`;break;}
+    case "Awaiting Factory":q=`Waiting for ${o.factory} to confirm`;h="If there's no reply by tomorrow, a reminder goes out automatically.";a=sim(`<button class="btn sm" data-dsim="accept" type="button">Factory accepts</button><button class="btn sm danger" data-dsim="reject" type="button">Factory can't</button>`);break;
+    case "CAD Making":q=`${o.factory} is making the CAD`;h="It goes to the retailer for approval as soon as it arrives.";a=sim(`<button class="btn sm" data-dsim="cad" type="button">Factory sends CAD</button>`);break;
+    case "CAD Approval":q="Waiting for the retailer to approve the CAD";h="Sent on WhatsApp with Approve / Change buttons.";a=`<button class="btn good" data-act="cadApprove" data-ref="${o.ref}" type="button">Retailer approved</button><button class="btn" data-act="cadChange" data-ref="${o.ref}" type="button">Wants a change</button>`;break;
+    case "In Production":case "Repair":case "Wrong Order":
+      q=issue?`Back at ${o.factory}: ${o.status==="Repair"?"repair":"remake"}${o.issues.length?" ("+esc(o.issues[o.issues.length-1].reason.toLowerCase())+")":""}`:`Being made at ${o.factory}`;
+      h=lb>0?`<b style="color:var(--bad)">${lb} day${lb>1?"s":""} late.</b>${o.revised?" Factory now says "+fmt(o.revised)+".":""}`:`Due ${fmtL(dueDate(o))}${lb<=0?` (${-lb===0?"today":-lb+" days left"})`:""}. Follow-ups go out automatically.`;
+      a=`<button class="btn" data-fu1="${o.ref}" type="button">Send follow-up now</button>`+sim(`<button class="btn sm" data-dsim="ready" type="button">Ready</button><button class="btn sm" data-dsim="delay" type="button">3 days late</button>`);break;
+    case "Ready at Factory":q=`Ready at ${o.factory}`;h="Collect the piece and bring it to the office for checking.";a=`<button class="btn primary" data-act="receive" data-ref="${o.ref}" type="button">Received at office</button>`;break;
+    case "At Office · QC":q="Check the piece";h=`Does it match the order? ${item(o)}${o.size?", size "+esc(o.size):""}${o.remarks?", "+esc(o.remarks):""}.`;
+      a=issueForm?`<span class="small" style="align-self:center"><b>${issueForm==="Repair"?"What needs fixing?":"What's wrong?"}</b></span>${ISSUE_REASONS[issueForm].map(x=>`<button class="btn sm danger" data-ireason="${esc(x)}" type="button">${x}</button>`).join("")}<button class="btn link" data-issue="" type="button">Back</button>`
+        :`<button class="btn primary" data-act="qcpass" data-ref="${o.ref}" type="button">Pass, ship it</button><button class="btn danger" data-issue="Repair" type="button">Needs repair</button><button class="btn danger" data-issue="Wrong Order" type="button">Wrong order</button>`;break;
+    case "Dispatched":q="On the way to the retailer";h="The retailer got a WhatsApp update.";a=`<button class="btn" data-act="delivered" data-ref="${o.ref}" type="button">Mark delivered</button>`;break;
+    case "Completed":q=`Delivered${o.doneAt?" on "+fmtL(o.doneAt):""}`;h=o.readyAt&&o.deadline?(o.readyAt<=o.deadline?`${o.factory} had it ready on time.`:`${o.factory} was ${diff(o.readyAt,o.deadline)} days late.`):"";break;
+    case "Cancelled":q="Cancelled";break;
   }
-  const iform=issueForm?`<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="small"><b>${issueForm}</b> reason:</span>${ISSUE_REASONS[issueForm].map(x=>`<button class="btn sm bad" data-ireason="${esc(x)}" type="button">${x}</button>`).join("")}<span class="small muted">The piece goes back to ${o.factory} with a return note.</span></div>`:"";
   const fmsgs=(S.fchat[o.factory]||[]).filter(m=>m.ref===o.ref||(m.refs||[]).includes(o.ref));
-  const dl=daysLeft(o);
-  $("#drawer").innerHTML=`<div class="dh"><div><div class="small" style="opacity:.75;letter-spacing:.12em;text-transform:uppercase">Order</div><h2>#${o.ref}</h2><div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${pill(o.status)}${o.priority==="Urgent"?'<span class="pill urgent" style="background:var(--gold);color:var(--wine)">Urgent</span>':""}${o.design==="Custom"?'<span class="pill custom">New design</span>':'<span class="pill cat">Catalogue</span>'}</div></div><button class="x" id="dClose" type="button" aria-label="Close">×</button></div>
-  <div class="db">
-    ${o.status!=="Cancelled"?`<div class="steps">${path.map((s,i)=>`<div class="s ${i<ci?"done":i===ci?(issue?"cur issue":"cur"):""}">${STAGE_LBL[s].replace("Awaiting factory reply","Factory reply").replace("At office · QC","QC")}</div>`).join("")}</div>`:""}
-    ${A.length?`<div class="next"><h3>${issue?o.status+" · back at "+o.factory:"Next step"}</h3><div class="acts">${A.join("")}</div>${iform}</div>`:""}
-    <div class="facts">
-      <div><span>Customer</span><b>${esc(o.customer)}</b></div><div><span>Order date</span><b>${fmt(o.date)}</b></div><div><span>Factory</span><b>${esc(o.factory||"Not picked")}</b></div>
-      <div><span>Product</span><b>${o.product}</b></div><div><span>Purity</span><b>${o.purity}</b></div><div><span>Weight</span><b>${o.weight} g</b></div>
-      <div><span>Size</span><b>${esc(o.size||"–")}</b></div><div><span>Qty</span><b>${o.qty}</b></div><div><span>Design</span><b>${o.design==="Custom"?"New (CAD)":"Catalogue"}${o.code?" "+o.code:""}</b></div>
-      <div><span>Factory deadline</span><b>${fmt(o.deadline)}</b></div><div><span>Revised date</span><b>${o.revised?fmt(o.revised):"–"}</b></div><div><span>Days remain</span><b style="${isOver(o)?"color:var(--bad)":""}">${CLOSED.includes(o.status)||dl==null?"–":dl}</b></div>
-      <div style="grid-column:1/-1"><span>Remarks</span><b>${esc(o.remarks||"–")}</b></div>
+  $("#drawer").innerHTML=`<div class="d-head"><div><div class="small muted">Order</div><h2>#${o.ref}</h2><div class="sub">${status(o.status)}${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}${isOver(o)?`<span class="tag late">${lb}d late</span>`:""}</div></div><button class="icon-btn x" id="dClose" type="button" aria-label="Close">×</button></div>
+  <div class="d-body">
+    ${o.status!=="Cancelled"?`<div><div class="prog">${gs.map((g,i)=>`<i class="${i<gi?"on":i===gi?(issue?"bad":"cur"):""}"></i>`).join("")}</div><div class="prog-l">${gs.map((g,i)=>`<span class="${i===gi?"on":""}">${g.l}</span>`).join("")}</div></div>`:""}
+    <div class="next"><div class="q">${q}</div>${h?`<div class="h">${h}</div>`:""}${a?`<div class="a">${a}</div>`:""}</div>
+    <div class="det">
+      <div><span>Customer</span><b>${esc(o.customer)}</b></div><div><span>Factory</span><b>${esc(o.factory||"Not chosen yet")}</b></div>
+      <div><span>Item</span><b>${o.product==="MS"?"Mangalsutra":o.product} · ${o.purity}</b></div><div><span>Weight</span><b>about ${o.weight} g</b></div>
+      <div><span>Size</span><b>${esc(o.size||"–")}</b></div><div><span>Quantity</span><b>${o.qty}</b></div>
+      <div><span>Design</span><b>${o.design==="Custom"?"New design (CAD)":"Catalogue"}${o.code?" · "+o.code:""}</b></div><div><span>Factory deadline</span><b>${o.deadline?fmt(o.deadline):"–"}${o.revised&&!CLOSED.includes(o.status)?` → ${fmt(o.revised)}`:""}</b></div>
+      <div><span>Ordered</span><b>${fmt(o.date)} via ${esc(o.src)}</b></div>
+      ${o.remarks?`<div class="w"><span>Notes</span><b>${esc(o.remarks)}</b></div>`:""}
     </div>
-    ${o.issues.length?`<div class="next"><h3>Issues</h3>${o.issues.map(i=>`<div class="small"><span class="pill st-issue">${i.type}</span> ${esc(i.reason)} · ${fmt(i.date)}</div>`).join("")}</div>`:""}
-    ${o.factory?`<div><div class="small muted" style="margin-bottom:6px">Order message to ${o.factory}</div><pre class="wa">${wa(factoryMsg(o))}</pre></div>`:""}
-    ${fmsgs.length>1?`<div><div class="small muted" style="margin-bottom:6px">Factory chat for #${o.ref} only (${fmsgs.length} messages) <a href="#factories" data-fopen="${o.factory}|${o.ref}">open chat</a></div>
-      <div class="msgs" style="max-height:220px;border-radius:12px;border:1px solid var(--line)">${fmsgs.slice(-6).map(m=>`<div class="m ${m.from==="t22"?"out":""}">${m.art?art(m.art.p,m.art.cad):""}${wa(m.text.length>220?m.text.slice(0,220)+"…":m.text)}<span class="t">${fmt(m.d)} ${m.tm}</span></div>`).join("")}</div></div>`:""}
-    <div><div class="small muted" style="margin-bottom:8px">Timeline</div><ul class="tl">${[...o.hist].reverse().map(h=>`<li class="${h.k}"><time>${fmtL(h.d)}</time>${esc(h.t)}</li>`).join("")}</ul></div>
-    <div class="acts" style="display:flex;gap:8px;flex-wrap:wrap">${!CLOSED.includes(o.status)?`<button class="btn sm" data-act="urgent" data-ref="${o.ref}" type="button">${o.priority==="Urgent"?"Remove urgent":"Mark urgent"}</button>${WITH_FACTORY.includes(o.status)?`<button class="btn sm" data-act="reroute" data-ref="${o.ref}" type="button">Change factory</button>`:""}<button class="btn sm bad" data-act="cancel" data-ref="${o.ref}" type="button">Cancel order</button>`:""}</div>
+    ${o.factory?`<details><summary>Message sent to ${o.factory}</summary><div><pre class="wa">${wa(factoryMsg(o))}</pre></div></details>`:""}
+    ${fmsgs.length?`<details><summary>Factory chat for this order <span class="tag soft">${fmsgs.length}</span></summary><div><div class="msgs" style="max-height:260px;border-radius:12px;padding:12px">${fmsgs.slice(-6).map(m=>`<div class="m ${m.from==="t22"?"out":""}">${m.art?art(m.art.p,m.art.cad):""}${wa(m.text.length>240?m.text.slice(0,240)+"…":m.text)}<span class="tm">${fmt(m.d)} ${m.tm}</span></div>`).join("")}</div></div></details>`:""}
+    <details><summary>History <span class="tag soft">${o.hist.length}</span></summary><div><ul class="tl">${[...o.hist].reverse().map(x=>`<li><time>${fmt(x.d)}</time><span>${esc(x.t)}</span></li>`).join("")}</ul></div></details>
+    ${!CLOSED.includes(o.status)?`<div style="display:flex;gap:4px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px"><button class="btn link" data-act="urgent" data-ref="${o.ref}" type="button">${o.priority==="Urgent"?"Remove urgent":"Mark urgent"}</button>${WITH_FACTORY.includes(o.status)?`<button class="btn link" data-act="reroute" data-ref="${o.ref}" type="button">Change factory</button>`:""}<button class="btn link" data-act="cancel" data-ref="${o.ref}" type="button" style="margin-left:auto">Cancel order</button></div>`:""}
   </div>`;
-  const ms=$("#drawer .msgs");if(ms)ms.scrollTop=ms.scrollHeight;
 }
 
+/* Help */
+function openHelp(){
+  $("#help").innerHTML=`<div class="box"><h2 id="helpT">How this demo works</h2>
+    <p class="muted">Everything is simulated in your browser: no WhatsApp messages are sent. The sample orders follow the T22 Order DB.</p>
+    <h3>Try it in two minutes</h3>
+    <ol class="steps-l">
+      <li><span>Open <b>Chats</b> and tap <b>Hinglish order</b>. Confirm it in the chat.</span></li>
+      <li><span>The order gets a number, goes to a factory and is confirmed. Approve the CAD that arrives.</span></li>
+      <li><span>Switch to <b>Factories</b> and reply as the factory, for example “T434 ready”.</span></li>
+      <li><span>On <b>Overview</b>, mark it received and pass or fail the quality check.</span></li>
+      <li><span>Press <b>Next day</b>: follow-ups go out and factories reply.</span></li>
+    </ol>
+    <h3>Automation</h3>
+    <label class="sw"><input type="checkbox" data-set="autoRoute" ${S.set.autoRoute?"checked":""}>Send new orders to the suggested factory when it's a clear choice</label>
+    <label class="sw"><input type="checkbox" data-set="autoFollow" ${S.set.autoFollow?"checked":""}>Send follow-ups automatically each morning (urgent daily; others day 6, 8, 10, then daily)</label>
+    <label class="sw"><input type="checkbox" data-set="simFactory" ${S.set.simFactory?"checked":""}>Let factories reply on their own (demo)</label>
+    <h3>To go live</h3>
+    <p class="small muted">A WhatsApp Business number for Touch22, one WhatsApp contact per factory, and the T22 Order DB sheet as the data store. An AI model reads free-form messages and photos; this demo uses simple rules.</p>
+    <div style="display:flex;gap:8px;margin-top:20px"><button class="btn" id="resetBtn" type="button">Reset demo</button><button class="btn primary" id="helpClose" type="button" style="margin-left:auto">Got it</button></div></div>`;
+  $("#help").classList.add("on");S.seenHow=true;save();
+}
 /* ---------- next day ---------- */
 function nextDay(){
   S.today=add(S.today,1);
@@ -1001,79 +924,90 @@ function factoryEventQuiet(o){
   setStatus(o,"Ready at Factory",`${o.factory}: piece ready${S.today>o.deadline&&!o.issues.length?` (${diff(S.today,o.deadline)} days late)`:""}`,"f");
 }
 
-/* ---------- misc UI ---------- */
+
+/* ---------- misc ---------- */
 const timers=[];
 function later(fn,ms){timers.push(setTimeout(fn,ms));}
-function toast(h){const t=document.createElement("div");t.className="toast";t.innerHTML=h;$("#toasts").appendChild(t);setTimeout(()=>t.remove(),4200);}
+function toast(h){const t=document.createElement("div");t.className="toast";t.innerHTML=h;$("#toasts").appendChild(t);setTimeout(()=>t.remove(),4000);}
 function go(h){
-  const [v,a,b]=h.split(":");
-  if(v==="orders"&&a){oFilter={q:"",factory:"",status:"",priority:""};oTab="active";
-    if(a==="urgent")oFilter.priority="Urgent";else if(a==="overdue")oFilter.status="overdue";else if(a==="issues")oFilter.status="issues";
-    else if(a==="done"){oTab="done";oFilter.status="Completed";}else if(a==="Completed"){oTab="done";oFilter.status="Completed";}else if(a==="Cancelled"){oTab="done";oFilter.status="Cancelled";}
-    else if(a==="f"){oTab="all";oFilter.factory=b;}else if(a!=="active")oFilter.status=a;}
-  location.hash=v;if(view===v)renderAll();
+  const [v,a]=h.split(":");
+  if(v==="orders"){oQuick=a==="late"?"late":"";oFac="";oQ="";}
+  if(location.hash==="#"+v)renderAll();else location.hash=v;
 }
-function route_(){const h=(location.hash||"#dashboard").slice(1);view=VIEWS.some(v=>v[0]===h)?h:"dashboard";$$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+view));renderAll();window.scrollTo(0,0);}
+function onRoute(){
+  const h=(location.hash||"#overview").slice(1);
+  view=VIEWS.some(v=>v[0]===h)?h:"overview";
+  $$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+view));
+  renderAll();window.scrollTo(0,0);
+}
+function exportCSV(){
+  const cols=["Ref","Order Date","Customer Name","Factory","Factory Deadline","Status","Product","Days Remain","Priority","Remarks","Size","Purity","Design","Issue Type","Issue Date"];
+  const rows=ordersFiltered(true).map(o=>{const i=o.issues[o.issues.length-1];return [o.ref,o.date,o.customer,o.factory,o.deadline,o.status,o.product,CLOSED.includes(o.status)||!o.deadline?"":daysLeft(o),o.priority,o.remarks,o.size,o.purity,o.design,i?i.type:"",i?i.date:""];});
+  const csv=[cols,...rows].map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`T22-orders-${S.today}.csv`;a.click();
+}
 
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,a,tr");if(!t)return;
   const d=t.dataset;
   if(d.open){e.preventDefault();return openDrawer(d.open);}
   if(d.go){e.preventDefault();return go(d.go);}
-  if(d.send){const sel=$(`[data-fsel="${d.send}"]`,t.parentElement)||$(`[data-fsel="${d.send}"]`);const o=byRef(d.send);sendToFactory(o,sel.value);save();return renderAll();}
-  if(d.act){return act(d.ref,d.act);}
-  if(d.otab){oTab=d.otab;if(oTab==="active"&&["Completed","Cancelled"].includes(oFilter.status))oFilter.status="";return renderOrders();}
-  if(d.sort){oSort={k:d.sort,dir:oSort.k===d.sort?-oSort.dir:1};return renderOrders();}
-  if(d.sample){$("#botIn").value="";return retailerSend(t.dataset.sample);}
-  if(d.bb!=null){return botButton(S.bot.cur,+d.bb,d.a,d.ref);}
-  if(d.fac){facCur=d.fac;facRef="";return renderFac();}
-  if(d.fref!=null){facRef=d.fref;return renderFac();}
-  if(d.sim){const o=byRef($("#simRef").value);if(!o)return;const k=d.sim;
-    if(k==="acceptLate")return factoryEvent(o,"accept",{date:add(o.deadline,3)});
-    if(k==="delay")return factoryEvent(o,"delay",{days:3});return factoryEvent(o,k);}
+  if(d.scroll){const el=$("#"+d.scroll);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  if(d.send){const sel=$(`[data-fsel="${d.send}"]`,t.parentElement)||$(`[data-fsel="${d.send}"]`);sendToFactory(byRef(d.send),sel.value);save();return renderAll();}
+  if(d.act)return act(d.ref,d.act);
+  if(d.problem){openDrawer(d.problem);return;}
+  if(d.omode){oMode=d.omode;return renderOrders();}
+  if(d.quick!=null){oQuick=oQuick===d.quick?"":d.quick;return renderOrders();}
+  if(d.cmode){cMode=d.cmode;cRef="";cOpen=false;return renderChats();}
+  if(d.chat){if(cMode==="r"){cId=d.chat;S.bot.cur=cId;save();}else{cFac=d.chat;cRef="";}cOpen=true;return renderChats();}
+  if(d.sample){cOpen=true;return retailerSend(d.sample);}
+  if(d.bb!=null)return botButton(cId,+d.bb,d.a,d.ref);
+  if(d.sim){const o=byRef($("#simRef").value);if(!o)return;
+    if(d.sim==="acceptLate")return factoryEvent(o,"accept",{date:add(o.deadline,3)});
+    if(d.sim==="delay")return factoryEvent(o,"delay",{days:3});
+    return factoryEvent(o,d.sim);}
   if(d.dsim){const o=byRef(drawerRef);if(d.dsim==="delay")return factoryEvent(o,"delay",{days:3});return factoryEvent(o,d.dsim);}
-  if(d.fu){return sendFollowups(followDue().filter(o=>o.factory===d.fu));}
-  if(d.fu1){return sendFollowups([byRef(d.fu1)]);}
-  if(d.issue){issueForm=d.issue;return renderDrawer();}
+  if(d.fu1)return sendFollowups([byRef(d.fu1)]);
+  if(d.issue!=null){issueForm=d.issue||null;return renderDrawer();}
   if(d.ireason){const ty=issueForm;issueForm=null;return act(drawerRef,"issue",{type:ty,reason:d.ireason});}
-  if(d.fopen){const [f,r]=d.fopen.split("|");facCur=f;facRef=r;closeDrawer();return;}
-  if(t.id==="dClose")return closeDrawer();
-  if(t.id==="sendAll")return sendFollowups(followDue());
-  if(t.id==="nextDay")return nextDay();
-  if(t.id==="resetBtn"){timers.forEach(clearTimeout);S=seed();save();closeDrawer();facCur="Mars";facRef="";toast("Demo reset to the sample data");return route_();}
-  if(t.id==="clearChat"){S.bot.convs[S.bot.cur]=null;delete S.bot.convs[S.bot.cur];save();return renderBot();}
-  if(t.id==="botPhoto")return retailerSend("",true);
-  if(t.id==="csv")return exportCSV();
+  switch(t.id){
+    case "dClose":return closeDrawer();
+    case "sendAll":return sendFollowups(followDue());
+    case "nextDay":return nextDay();
+    case "helpBtn":return openHelp();
+    case "helpClose":return $("#help").classList.remove("on");
+    case "resetBtn":timers.forEach(clearTimeout);S=seed();S.seenHow=true;save();closeDrawer();$("#help").classList.remove("on");cId="parekh";cFac="Mars";cRef="";cOpen=false;toast("Demo reset to the sample data");return onRoute();
+    case "clearChat":delete S.bot.convs[cId];save();return renderChats();
+    case "botPhoto":return retailerSend("",true);
+    case "csv":return exportCSV();
+    case "oDone":oDone=!oDone;return renderOrders();
+    case "cBack":cOpen=false;return renderChats();
+  }
 });
 $("#scrim").addEventListener("click",closeDrawer);
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer();});
+$("#help").addEventListener("click",e=>{if(e.target.id==="help")$("#help").classList.remove("on");});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrawer();$("#help").classList.remove("on");}});
 document.addEventListener("submit",e=>{
   e.preventDefault();
-  if(e.target.id==="botForm"){const v=$("#botIn").value;$("#botIn").value="";retailerSend(v);setTimeout(()=>$("#botIn")&&$("#botIn").focus(),30);}
-  if(e.target.id==="facForm"){const v=$("#facIn").value.trim();if(v)typedFactory(facCur,v);}
+  if(e.target.id==="botForm"){const v=$("#botIn").value;if(!v.trim())return;retailerSend(v);setTimeout(()=>{const i=$("#botIn");if(i)i.focus();},40);}
+  if(e.target.id==="facForm"){const v=$("#facIn").value.trim();if(v)typedFactory(cFac,v);}
 });
-document.addEventListener("input",e=>{if(e.target.id==="oq"){oFilter.q=e.target.value;renderOrders();}});
+document.addEventListener("input",e=>{if(e.target.id==="oq"){oQ=e.target.value;renderOrders();}});
 document.addEventListener("change",e=>{
   const t=e.target;
-  if(t.id==="of"){oFilter.factory=t.value;renderOrders();}
-  if(t.id==="os"){oFilter.status=t.value;if(["Completed","Cancelled"].includes(t.value))oTab="done";else if(t.value&&t.value!=="issues")oTab="active";renderOrders();}
-  if(t.id==="op"){oFilter.priority=t.value;renderOrders();}
-  if(t.id==="persona"){S.bot.cur=t.value;save();renderBot();}
-  if(t.id==="simRef"){facRef=t.value;renderFac();}
+  if(t.id==="ofac"){oFac=t.value;renderOrders();}
+  if(t.id==="cRef"){cRef=t.value;renderChats();}
+  if(t.id==="simRef"){cRef=t.value;renderChats();}
   if(t.dataset.set){S.set[t.dataset.set]=t.checked;save();}
 });
-// tooltip
 const tip=$("#tip");
 document.addEventListener("mouseover",e=>{const t=e.target.closest("[data-tip]");if(!t){tip.classList.remove("on");return;}tip.textContent=t.dataset.tip;tip.classList.add("on");});
 document.addEventListener("mousemove",e=>{if(!tip.classList.contains("on"))return;tip.style.left=Math.min(e.clientX+12,innerWidth-270)+"px";tip.style.top=(e.clientY+14)+"px";});
-function exportCSV(){
-  const cols=["Ref","Order Date","Customer Name","Factory","Factory Deadline","Status","Product","Days Remain","Priority","Remarks","Size","Purity","Design","Issue Type","Issue Date"];
-  const rows=filteredOrders().map(o=>{const i=o.issues[o.issues.length-1];return [o.ref,o.date,o.customer,o.factory,o.deadline,o.status,o.product,CLOSED.includes(o.status)?"":daysLeft(o),o.priority,o.remarks,o.size,o.purity,o.design,i?i.type:"",i?i.date:""];});
-  const csv=[cols,...rows].map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`T22-orders-${S.today}.csv`;a.click();
-}
 
-S=load()||seed();save();
-window.addEventListener("hashchange",route_);
-route_();
+S=load()||seed();
+cId=S.bot.cur||"parekh";
+save();
+window.addEventListener("hashchange",onRoute);
+onRoute();
+if(!S.seenHow)openHelp();
 })();
