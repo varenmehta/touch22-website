@@ -1,22 +1,20 @@
-"""Add the Hindi voiceover to the showcase video.
+"""Add a voiceover to the showcase video.
 
-Reads the timed lines from ../hindi-voiceover-script.md, voices each one with
-edge-tts (hi-IN-SwaraNeural), checks that no line runs into the next step,
+Reads the timed lines from a script in ../ (Hindi or English), voices each one
+with edge-tts, checks that no line runs into the next step,
 then places each line at its timestamp, ducks the music under the voice and
 muxes it onto the silent video.
 
   pip install edge-tts
-  python3 voiceover.py [work_dir]      # needs ffmpeg; uses $HTTPS_PROXY if set
+  python3 voiceover.py [hindi|english] [work_dir]   # needs ffmpeg; uses $HTTPS_PROXY if set
 """
 import os, re, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 VIDEO_DIR = os.path.dirname(HERE)
-SCRIPT = os.path.join(VIDEO_DIR, "hindi-voiceover-script.md")
 SILENT = os.path.join(VIDEO_DIR, "Touch22-Order-Desk-showcase.mp4")
 MUSIC = os.path.join(VIDEO_DIR, "Touch22-Order-Desk-showcase-music.mp4")
-OUT = os.path.join(VIDEO_DIR, "Touch22-Order-Desk-showcase-hindi.mp4")
-VOICE = "hi-IN-SwaraNeural"
+VOICES = {"hindi": "hi-IN-SwaraNeural", "english": "en-IN-NeerjaNeural"}
 MIN_GAP = 0.5  # seconds of quiet before the next line starts
 
 
@@ -35,7 +33,11 @@ def speech_end(path):
 
 
 def main():
-    work = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "vo")
+    lang = sys.argv[1] if len(sys.argv) > 1 else "hindi"
+    VOICE = VOICES[lang]
+    SCRIPT = os.path.join(VIDEO_DIR, f"{lang}-voiceover-script.md")
+    OUT = os.path.join(VIDEO_DIR, f"Touch22-Order-Desk-showcase-{lang}.mp4")
+    work = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "vo", lang)
     os.makedirs(work, exist_ok=True)
     lines = []
     for row in open(SCRIPT, encoding="utf-8"):
