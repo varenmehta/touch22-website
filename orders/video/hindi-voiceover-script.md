@@ -1,11 +1,11 @@
 # Touch22 Order Desk: Hindi voiceover script
 
-Timed to the current video (6:28). Each line fits inside its step with room to breathe. Natural spoken Hindi, with common business words (order, factory, CAD, WhatsApp) left in English the way the team says them.
+Timed to the current video (6:28). Each line fits inside its step with room to breathe. Voiced with Microsoft Edge TTS, hi-IN-SwaraNeural (see make/voiceover.py). Natural spoken Hindi, with common business words (order, factory, CAD, WhatsApp) left in English the way the team says them.
 
 | Time | Step | Voiceover (Hindi) |
 |---|---|---|
-| 0:01 | Intro | नमस्ते। पेश है Touch22 Order Desk: WhatsApp के एक मैसेज से लेकर पीस की डिलीवरी तक, हर ऑर्डर एक जगह। |
-| 0:08 | Today | आज ऑर्डर WhatsApp chats में बिखरे रहते हैं। ऑर्डर नंबर नहीं होता, follow-up याद से करने पड़ते हैं, और यह पता नहीं चलता कि कौन सी factory समय पर माल देती है। Order Desk हर ऑर्डर को एक नंबर देता है, और आख़िर तक उसका ध्यान रखता है। |
+| 0:01 | Intro | नमस्ते। पेश है Touch22 Order Desk: हर ऑर्डर, एक जगह। |
+| 0:08 | Today | आज ऑर्डर WhatsApp chats में बिखरे रहते हैं, और follow-up याद से करने पड़ते हैं। Order Desk हर ऑर्डर को एक नंबर देता है, और डिलीवरी तक उसका ध्यान रखता है। |
 | 0:21 | 1. Overview | सुबह खोलते ही पूरा दिन सामने है। आज क्या करना है, कितने ऑर्डर चल रहे हैं, कौन से लेट हैं। हर काम के लिए बस एक बटन। |
 | 0:41 | 2. WhatsApp order | Retailer अपने ही अंदाज़ में WhatsApp पर ऑर्डर लिखता है। Bot product, carat, वज़न, साइज़ और डिज़ाइन ख़ुद समझ लेता है, और कन्फ़र्म करने के लिए summary भेजता है। एक टैप, और ऑर्डर को अपना नंबर मिल जाता है: T434। |
 | 1:18 | 3. Hindi and Hinglish | हिंदी, अंग्रेज़ी या Hinglish, कोई भी भाषा चलेगी। कुछ छूट जाए तो bot सिर्फ़ वही एक बात पूछता है, उसी भाषा में। |
