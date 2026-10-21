@@ -735,7 +735,7 @@ function renderOrders(){
       </tbody></table>${!sorted.length?'<div class="empty">No orders match.</div>':""}</div>`;
   }
   $("#v-orders").innerHTML=`<div class="page-head"><div><h1>Orders</h1><p>Every order keeps one number from the first message to delivery.</p></div>
-    <div class="right"><div class="seg"><button class="${oMode==="board"?"on":""}" data-omode="board" type="button">Board</button><button class="${oMode==="list"?"on":""}" data-omode="list" type="button">List</button></div><button class="btn sm" id="csv" type="button">Export to Sheets</button></div></div>${tb}${body}`;
+    <div class="right"><div class="seg"><button class="${oMode==="board"?"on":""}" data-omode="board" type="button">Board</button><button class="${oMode==="list"?"on":""}" data-omode="list" type="button">List</button></div><button class="btn sm" id="csv" type="button" title="Copies the orders with the T22 Order DB columns, ready to paste into Google Sheets">Copy for Sheets</button></div></div>${tb}${body}`;
   if(keep){const i=$("#oq");i.focus();i.setSelectionRange(i.value.length,i.value.length);}
 }
 
@@ -932,25 +932,29 @@ function toast(h){const t=document.createElement("div");t.className="toast";t.in
 function go(h){
   const [v,a]=h.split(":");
   if(v==="orders"){oQuick=a==="late"?"late":"";oFac="";oQ="";}
-  if(location.hash==="#"+v)renderAll();else location.hash=v;
+  showView(v);
 }
-function onRoute(){
-  const h=(location.hash||"#overview").slice(1);
-  view=VIEWS.some(v=>v[0]===h)?h:"overview";
-  $$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+view));
+function showView(v){
+  view=VIEWS.some(x=>x[0]===v)?v:"overview";
+  try{if(location.hash!=="#"+view)history.replaceState(null,"","#"+view);}catch(e){}
+  $$(".view").forEach(x=>x.classList.toggle("on",x.id==="v-"+view));
   renderAll();window.scrollTo(0,0);
 }
+function onRoute(){showView((location.hash||"#overview").slice(1));}
 function exportCSV(){
   const cols=["Ref","Order Date","Customer Name","Factory","Factory Deadline","Status","Product","Days Remain","Priority","Remarks","Size","Purity","Design","Issue Type","Issue Date"];
   const rows=ordersFiltered(true).map(o=>{const i=o.issues[o.issues.length-1];return [o.ref,o.date,o.customer,o.factory,o.deadline,o.status,o.product,CLOSED.includes(o.status)||!o.deadline?"":daysLeft(o),o.priority,o.remarks,o.size,o.purity,o.design,i?i.type:"",i?i.date:""];});
-  const csv=[cols,...rows].map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`T22-orders-${S.today}.csv`;a.click();
+  const tsv=[cols,...rows].map(r=>r.map(v=>String(v??"").replace(/[\t\n]/g," ")).join("\t")).join("\n");
+  const ok=()=>toast(`Copied <b>${rows.length} orders</b>. Paste into Google Sheets`);
+  try{navigator.clipboard.writeText(tsv).then(ok,()=>dl());}catch(e){dl();}
+  function dl(){toast("Couldn't copy here. Open the List view and copy the table instead.");}
 }
 
 document.addEventListener("click",e=>{
   const t=e.target.closest("button,a,tr");if(!t)return;
   const d=t.dataset;
   if(d.open){e.preventDefault();return openDrawer(d.open);}
+  if(t.tagName==="A"&&/^#\w+$/.test(t.getAttribute("href")||"")){e.preventDefault();return showView(t.getAttribute("href").slice(1));}
   if(d.go){e.preventDefault();return go(d.go);}
   if(d.scroll){const el=$("#"+d.scroll);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return;}
   if(d.send){const sel=$(`[data-fsel="${d.send}"]`,t.parentElement)||$(`[data-fsel="${d.send}"]`);sendToFactory(byRef(d.send),sel.value);save();return renderAll();}
