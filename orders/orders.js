@@ -617,78 +617,115 @@ function art(p,cad){
 
 /* ---------- interface ---------- */
 const GROUPS=[
- {k:"new",l:"New",s:["Enquiry"],h:"Choose a factory"},
- {k:"fac",l:"At factory",s:["Awaiting Factory"],h:"Waiting for a reply"},
- {k:"cad",l:"Design",s:["CAD Making","CAD Approval"],h:"CAD and approval"},
- {k:"make",l:"Making",s:["In Production","Repair","Wrong Order"],h:"In production"},
- {k:"qc",l:"Quality check",s:["Ready at Factory","At Office · QC"],h:"Collect and check"},
- {k:"ship",l:"Shipped",s:["Dispatched"],h:"On the way"}];
+ {k:"new",l:"New",s:["Enquiry"],h:"Choose a factory",ic:"inbox"},
+ {k:"fac",l:"At factory",s:["Awaiting Factory"],h:"Waiting for a reply",ic:"factory"},
+ {k:"cad",l:"Design",s:["CAD Making","CAD Approval"],h:"CAD and approval",ic:"pen"},
+ {k:"make",l:"Making",s:["In Production","Repair","Wrong Order"],h:"In production",ic:"gem"},
+ {k:"qc",l:"Quality check",s:["Ready at Factory","At Office · QC"],h:"Collect and check",ic:"shield"},
+ {k:"ship",l:"Shipped",s:["Dispatched"],h:"On the way",ic:"truck"}];
 const grpOf=s=>GROUPS.find(g=>g.s.includes(s));
 const stCls=s=>isIssueS(s)?"issue":CLOSED.includes(s)?"done":(grpOf(s)||{}).k||"";
 const isIssueS=s=>s==="Repair"||s==="Wrong Order";
 const status=s=>`<span class="st ${stCls(s)}"><i></i>${esc(STAGE_LBL[s]||s)}</span>`;
 const item=o=>`${o.product==="MS"?"Mangalsutra":o.product} · ${o.purity} · ${o.weight} g`;
-const refBtn=r=>`<button class="ref" data-open="${r}" type="button">#${r}</button>`;
+const refBtn=r=>`<button class="ref" data-open="${r}" type="button">${r}</button>`;
+/* Line icons in the same style as the live app (lucide). */
 const ICON={
- overview:'<path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
- orders:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 4v16M15 4v16"/>',
+ today:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+ orders:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/>',
  chats:'<path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.4A8.5 8.5 0 1 1 21 12z"/>',
- reports:'<path d="M4 20V11M10 20V5M16 20v-6M2 20h20"/>'
+ shops:'<path d="m2 7 4.4-4.4A2 2 0 0 1 7.8 2h8.4a2 2 0 0 1 1.4.6L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20M22 7v3a2 2 0 0 1-4 0V7M18 7v3a2 2 0 0 1-4 0V7M14 7v3a2 2 0 0 1-4 0V7M10 7v3a2 2 0 0 1-4 0V7M6 7v3a2 2 0 0 1-4 0V7"/>',
+ factories:'<path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1M12 18h1M7 18h1"/>',
+ factory:'<path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1M12 18h1M7 18h1"/>',
+ send:'<path d="M14.5 21.7a.5.5 0 0 0 .9-.1l6.5-19a.5.5 0 0 0-.6-.6l-19 6.5a.5.5 0 0 0-.1.9l7.9 3.2a2 2 0 0 1 1.1 1.1z"/><path d="m21.9 2.1-10.9 10.9"/>',
+ bell:'<path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/><path d="M3.3 15.3A1 1 0 0 0 4 17h16a1 1 0 0 0 .7-1.7C19.4 14 18 12.6 18 8A6 6 0 0 0 6 8c0 4.6-1.4 6-2.7 7.3"/>',
+ package:'<path d="m16 16 2 2 4-4"/><path d="M21 10V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l2-1.1"/><path d="m7.5 4.3 9 5.2M3.3 7 12 12l8.7-5M12 22V12"/>',
+ shield:'<path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.7 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.5 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+ truck:'<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2M15 18H9M19 18h2a1 1 0 0 0 1-1v-3.7a1 1 0 0 0-.2-.6l-3.5-4.3A1 1 0 0 0 17.5 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+ pen:'<path d="M21.2 6.8a1 1 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z"/>',
+ inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.8 1.1z"/>',
+ msg:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22z"/><path d="M12 8v4M12 16h.01"/>',
+ gem:'<path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/>',
+ alarm:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M5 3 2 6M22 6l-3-3"/>',
+ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ checks:'<path d="M18 6 7 17l-5-5M22 10l-7.5 7.5L13 16"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>',
+ x:'<path d="M18 6 6 18M6 6l12 12"/>',
+ dot:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/>',
+ bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',
+ search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+ list:'<path d="M3 12h.01M3 18h.01M3 6h.01M8 12h13M8 18h13M8 6h13"/>',
+ board:'<path d="M6 5v11M12 5v6M18 5v14"/>',
+ back:'<path d="m12 19-7-7 7-7M19 12H5"/>',
+ spark:'<path d="M9.9 15.5A2 2 0 0 0 8.5 14.1L2.4 12.5a.5.5 0 0 1 0-1l6.1-1.6A2 2 0 0 0 9.9 8.5l1.6-6.1a.5.5 0 0 1 1 0l1.6 6.1a2 2 0 0 0 1.4 1.4l6.1 1.6a.5.5 0 0 1 0 1l-6.1 1.6a2 2 0 0 0-1.4 1.4l-1.6 6.1a.5.5 0 0 1-1 0z"/>',
+ flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3.3A2.5 2.5 0 0 0 8.5 14.5"/>',
+ trophy:'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.7V17c0 .6-.5 1-1 1.2C7.8 18.8 7 20.2 7 22M14 14.7V17c0 .6.5 1 1 1.2 1.2.6 2 2 2 3.8M18 2H6v7a6 6 0 0 0 12 0V2Z"/>'
 };
-const VIEWS=[["overview","Overview"],["orders","Orders"],["chats","Chats"],["reports","Reports"]];
-let view="overview";
-const svg=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+const VIEWS=[["today","Today"],["orders","Orders"],["chats","Chats"],["shops","Shops"],["factories","Factories"]];
+let view="today",backTo="orders";
+const svg=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]||""}</svg>`;
 
 function todos(){
   const A=active();
-  return {enq:S.orders.filter(o=>o.status==="Enquiry"),ready:A.filter(o=>o.status==="Ready at Factory"),qc:A.filter(o=>o.status==="At Office · QC"),
-    cad:A.filter(o=>o.status==="CAD Approval"),due:followDue()};
+  return {enq:S.orders.filter(o=>o.status==="Enquiry"),cad:A.filter(o=>o.status==="CAD Approval"),late:A.filter(isOver).sort((a,b)=>lateBy(b)-lateBy(a)),
+    ready:A.filter(o=>o.status==="Ready at Factory"),qc:A.filter(o=>o.status==="At Office · QC"),ship:A.filter(o=>o.status==="Dispatched"),due:followDue()};
 }
-function todoCount(t){return t.enq.length+t.ready.length+t.qc.length+t.cad.length+(t.due.length?1:0);}
+function todoCount(t){return t.enq.length+t.cad.length+t.late.length+t.ready.length+t.qc.length+t.ship.length;}
 
 function renderTabs(){
-  const t=todos();const n=todoCount(t);
-  $("#tabs").innerHTML=VIEWS.map(([k,l])=>`<a href="#${k}" class="${view===k?"on":""}">${svg(k)}<span>${l}</span>${k==="overview"&&n?`<span class="n">${n}</span>`:""}</a>`).join("");
+  const t=todos();const n=todoCount(t);const cur=view==="order"?backTo:view;
+  $("#tabs").innerHTML=VIEWS.map(([k,l])=>`<a href="#${k}" class="${cur===k?"on":""}">${svg(k)}<span>${l}</span>${k==="today"&&n?`<span class="n">${n}</span>`:""}</a>`).join("");
   $("#todayLbl").textContent=fmtL(S.today);
 }
 function renderAll(){
   renderTabs();
-  ({overview:renderOverview,orders:renderOrders,chats:renderChats,reports:renderReports})[view]();
-  if(drawerRef)renderDrawer();
+  ({today:renderToday,orders:renderOrders,chats:renderChats,shops:renderShops,factories:renderFactories,order:renderDrawer})[view]();
 }
 
-/* Overview */
-function renderOverview(){
+/* Today */
+const row=(ic,tone,body,acts)=>`<div class="r-item"><div class="r-ic ${tone||""}">${svg(ic)}</div><div class="r-body">${body}</div>${acts?`<div class="r-act">${acts}</div>`:""}</div>`;
+const line=(o,extra)=>`<div class="r-t">${refBtn(o.ref)}<b>${esc(o.customer)}</b>${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}${o.design==="Custom"&&o.status==="Enquiry"?'<span class="tag new">New design</span>':""}</div><div class="s">${item(o)}${o.remarks?" · "+esc(o.remarks):""}${extra||""}</div>`;
+const grp=(title,rows)=>rows.length?`<div class="grp"><span>${title}</span></div>${rows.join("")}`:"";
+function renderToday(){
   const A=active(),t=todos(),n=todoCount(t);
-  const late=A.filter(isOver).sort((a,b)=>lateBy(b)-lateBy(a));
-  const recent=S.orders.filter(o=>o.readyAt&&o.readyAt<=S.today&&diff(S.today,o.readyAt)<=30&&o.deadline);
-  const ot=recent.length?recent.filter(o=>o.readyAt<=o.deadline).length/recent.length:0;
   const hr=new Date().getHours();const hello=hr<12?"Good morning":hr<17?"Good afternoon":"Good evening";
+  const urgent=new Set([...t.late,...[...t.enq,...t.ready,...t.qc].filter(o=>o.priority==="Urgent")].map(o=>o.ref)).size;
+  const week=A.filter(o=>WITH_FACTORY.includes(o.status)&&dueDate(o)&&dueDate(o)>=S.today&&dueDate(o)<=add(S.today,7)).length;
+  const month=S.today.slice(0,8);
+  const delivered=S.orders.filter(o=>o.status==="Completed"&&o.doneAt&&o.doneAt.startsWith(month)).length;
   const facBy={};t.due.forEach(o=>facBy[o.factory]=(facBy[o.factory]||0)+1);
-  const rows=[];
-  if(t.due.length)rows.push(`<div class="r-item"><div class="r-ic gold">🔔</div><div class="r-body"><b>Send today's follow-ups</b><div class="s">${t.due.length} order${t.due.length>1?"s":""} at ${Object.keys(facBy).length} factor${Object.keys(facBy).length>1?"ies":"y"} · one numbered message per factory</div></div><div class="r-act"><button class="btn primary sm" id="sendAll" type="button">Send all</button></div></div>`);
-  t.enq.forEach(o=>{const r=route(o);rows.push(`<div class="r-item"><div class="r-ic">🆕</div><div class="r-body"><b>Choose a factory for ${refBtn(o.ref)}</b>${o.priority==="Urgent"?' <span class="tag urgent">Urgent</span>':""}<div class="s">${esc(o.customer)} · ${item(o)}${o.design==="Custom"?" · new design":""} · suggested ${r.best.f} (${r.best.why[0]==null?"":esc(r.best.why.find(w=>w.includes("on time"))||"")})</div></div><div class="r-act"><select class="sel" data-fsel="${o.ref}" aria-label="Factory">${r.all.map(a=>`<option ${a.f===r.best.f?"selected":""}>${a.f}</option>`).join("")}</select><button class="btn primary sm" data-send="${o.ref}" type="button">Send</button></div></div>`);});
-  t.qc.forEach(o=>rows.push(`<div class="r-item"><div class="r-ic">🔍</div><div class="r-body"><b>Check ${refBtn(o.ref)}</b><div class="s">${esc(o.customer)} · ${item(o)}${o.size?" · size "+esc(o.size):""} · from ${o.factory}</div></div><div class="r-act"><button class="btn good sm" data-act="qcpass" data-ref="${o.ref}" type="button">Pass, ship it</button><button class="btn danger sm" data-problem="${o.ref}" type="button">Problem</button></div></div>`));
-  t.ready.forEach(o=>rows.push(`<div class="r-item"><div class="r-ic ok">📦</div><div class="r-body"><b>Collect ${refBtn(o.ref)} from ${o.factory}</b><div class="s">${esc(o.customer)} · ${item(o)}</div></div><div class="r-act"><button class="btn sm" data-act="receive" data-ref="${o.ref}" type="button">Received</button></div></div>`));
-  t.cad.forEach(o=>rows.push(`<div class="r-item"><div class="r-ic gold">✏️</div><div class="r-body"><b>CAD waiting for approval, ${refBtn(o.ref)}</b><div class="s">${esc(o.customer)} · sent on WhatsApp</div></div><div class="r-act"><button class="btn sm" data-act="cadApprove" data-ref="${o.ref}" type="button">Approved</button></div></div>`));
-  $("#v-overview").innerHTML=`
-  <div class="page-head"><div><h1>${hello}</h1><p>${fmtL(S.today)} · ${A.length} orders in progress</p></div></div>
-  <div class="stats">
-    <button class="stat hl" data-scroll="todo" type="button"><div class="l">Needs you today</div><div class="v">${n}</div><div class="h">Tasks in your to-do list</div></button>
-    <button class="stat" data-go="orders" type="button"><div class="l">In progress</div><div class="v">${A.length}</div><div class="h">${A.filter(o=>o.priority==="Urgent").length} urgent</div></button>
-    <button class="stat ${late.length?"bad":""}" data-go="orders:late" type="button"><div class="l">Running late</div><div class="v">${late.length}</div><div class="h">Past the factory's deadline</div></button>
-    <button class="stat" data-go="reports" type="button"><div class="l">Ready on time</div><div class="v">${pct(ot)}</div><div class="h">Last 30 days, all factories</div></button>
+  const todo=[
+    grp("Send to a factory",t.enq.map(o=>{const r=route(o);return row("send","",line(o)+`<div class="sug">Suggested ${r.best.f}: ${esc(r.best.why.slice(0,3).join(", "))}</div>`,
+      `<select class="sel" data-fsel="${o.ref}" aria-label="Factory">${r.all.map(x=>`<option ${x.f===r.best.f?"selected":""}>${x.f}</option>`).join("")}</select><button class="btn primary sm" data-send="${o.ref}" type="button">Send</button>`);})),
+    grp("CAD with the retailer",t.cad.map(o=>row("pen","gold",line(o," · CAD sent on WhatsApp"),`<button class="btn sm" data-act="cadApprove" data-ref="${o.ref}" type="button">Retailer approved</button>`))),
+    grp("Late at factory",t.late.map(o=>row("bell","bad",line(o," · "+esc(o.factory))+`<div class="lt">${lateBy(o)} day${lateBy(o)>1?"s":""} late (due ${fmt(o.deadline)})${o.revised?", factory now says "+fmt(o.revised):""}</div>`,
+      `<button class="btn sm" data-fu1="${o.ref}" type="button" ${o.lastFollow===S.today?"disabled":""}>${o.lastFollow===S.today?"Reminded today":"Remind factory"}</button>`))),
+    grp("Ready to collect from factory",t.ready.map(o=>row("package","gold",line(o," · at "+esc(o.factory)),`<button class="btn primary sm" data-act="receive" data-ref="${o.ref}" type="button">Received at office</button>`))),
+    grp("Quality check",t.qc.map(o=>row("shield","",line(o,o.size?" · size "+esc(o.size):""),`<button class="btn link bad" data-problem="${o.ref}" type="button">Problem</button><button class="btn primary sm" data-act="qcpass" data-ref="${o.ref}" type="button">Passed, dispatch</button>`))),
+    grp("Shipped",t.ship.map(o=>row("truck","ok",line(o),`<button class="btn sm" data-act="delivered" data-ref="${o.ref}" type="button">${svg("checks")}Delivered</button>`)))
+  ].join("");
+  $("#v-today").innerHTML=`
+  <section class="hero">
+    <i class="ring r1"></i><i class="ring r2"></i><i class="glow"></i>${[["14%","70%",6],["22%","84%",4],["68%","58%",5],["40%","92%",3],["80%","76%",4]].map(([a,b,c],k)=>`<i class="gem-dot" style="top:${a};left:${b};width:${c}px;height:${c}px;animation-delay:${k*.7}s"></i>`).join("")}
+    <p class="eyebrow">${D(S.today).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}</p>
+    <h1>${hello}</h1>
+    <p class="sum">${n?`You have <b>${n} thing${n>1?"s":""}</b> to do today${urgent?`, and <b class="g">${urgent} need${urgent>1?"":"s"} you first</b>`:""}.`:"Nothing waiting on you. New WhatsApp orders will show up here."}</p>
+    <div class="hero-a">${urgent?`<button class="btn gold" data-scroll="todo" type="button">${svg("flame")}Review ${urgent} urgent</button>`:""}<button class="btn ghost-w" data-go="orders" type="button">Order board</button></div>
+  </section>
+  <div class="stats lift">
+    <button class="stat hl" data-go="orders" type="button"><div class="l">Open orders<span class="si">${svg("gem")}</span></div><div class="v">${A.length}</div><div class="h">not yet delivered</div></button>
+    <button class="stat ${t.late.length?"bad":""}" data-go="orders:late" type="button"><div class="l">Late at factory<span class="si">${svg("alarm")}</span></div><div class="v">${t.late.length}</div><div class="h">past the deadline</div></button>
+    <button class="stat" data-go="orders" type="button"><div class="l">Due this week<span class="si">${svg("cal")}</span></div><div class="v">${week}</div><div class="h">factory deadlines</div></button>
+    <button class="stat" data-go="factories" type="button"><div class="l">Delivered<span class="si">${svg("checks")}</span></div><div class="v">${delivered}</div><div class="h">this month</div></button>
   </div>
-  <div class="strip">${GROUPS.map(g=>{const c=S.orders.filter(o=>g.s.includes(o.status)).length;return `<button data-go="orders" type="button"><div class="n">${c}</div><div class="l"><span class="st ${g.k}"><i></i></span>${g.l}</div><div class="s">${g.h}</div></button>`;}).join("")}</div>
   <div class="cols">
-    <div class="card" id="todo"><div class="card-t"><h2>To do</h2><span class="tag soft">${n}</span></div>
-      <div class="rows">${rows.join("")||'<div class="empty"><span class="ic">✨</span>All done for today. Press <b>Next day</b> to move on.</div>'}</div></div>
+    <div class="card" id="todo"><div class="card-t"><h2>To do</h2><div class="sub">One button per order. Everything else happens on WhatsApp by itself.</div></div>
+      <div class="rows">${todo||`<div class="empty"><span class="ic">${svg("spark")}</span>All clear. Press <b>Next day</b> to move on.</div>`}</div></div>
     <div class="grid">
-      <div class="card"><div class="card-t"><h2>Running late</h2>${late.length?`<span class="tag late">${late.length}</span>`:""}</div>
-        <div class="rows">${late.slice(0,6).map(o=>`<div class="r-item"><div class="r-body"><b>${refBtn(o.ref)} · ${o.factory}</b><div class="s">${esc(o.customer)} · ${o.product}${o.revised?" · factory says "+fmt(o.revised):""}</div></div><span class="tag late">${lateBy(o)}d late</span></div>`).join("")||'<div class="empty">Nothing late 🎉</div>'}</div>
-        ${late.length>6?`<button class="btn link" data-go="orders:late" type="button">See all ${late.length} →</button>`:""}</div>
-      <div class="card"><div class="card-t"><h2>Latest updates</h2></div>
-        <div class="rows">${S.log.slice(0,5).map(l=>`<div class="r-item"><div class="r-body small">${l.ref&&l.t.includes("#"+l.ref)?esc(l.t).replace("#"+l.ref,refBtn(l.ref)):esc(l.t)}<div class="s">${l.d===S.today?"Today "+l.tm:fmt(l.d)}</div></div></div>`).join("")}</div></div>
+      <div class="card"><div class="card-t"><h2>Latest updates</h2><div class="sub">What the bot and the factories did.</div></div>
+        <div class="rows">${S.log.slice(0,5).map(l=>row("msg","gold",`<div class="small">${l.ref&&l.t.includes("#"+l.ref)?esc(l.t).replace("#"+l.ref,refBtn(l.ref)):esc(l.t)}</div><div class="s">${l.d===S.today?"Today "+l.tm:fmt(l.d)}</div>`)).join("")}</div></div>
+      <div class="card"><div class="card-t"><h2>Automatic follow-ups</h2><div class="sub">Sent to factories every morning at 10:00: urgent orders daily, others on day 6, 8, 10 and daily after day 10.</div></div>
+        <div class="fu"><span class="r-ic gold">${svg("inbox")}</span>${t.due.length?`<span><b>${t.due.length}</b> order${t.due.length>1?"s":""} at ${Object.keys(facBy).length} factor${Object.keys(facBy).length>1?"ies":"y"} will be followed up at the next run.</span><button class="btn sm" id="sendAll" type="button">Send now</button>`:`<span class="muted">No follow-ups due.</span>`}</div></div>
     </div>
   </div>`;
 }
@@ -713,29 +750,32 @@ function dueCell(o){
 function renderOrders(){
   const keep=document.activeElement&&document.activeElement.id==="oq";
   const os=ordersFiltered(oMode==="list"&&oDone);
+  const open=active().length;
   const tb=`<div class="toolbar">
-    <input class="search" id="oq" type="search" placeholder="Search order, customer, product…" value="${esc(oQ)}" aria-label="Search orders">
     <select class="sel" id="ofac" aria-label="Factory"><option value="">All factories</option>${FACTORIES.map(f=>`<option ${oFac===f.name?"selected":""}>${f.name}</option>`).join("")}</select>
     <button class="chip ${oQuick==="late"?"on":""}" data-quick="late" type="button">Running late</button>
     <button class="chip ${oQuick==="urgent"?"on":""}" data-quick="urgent" type="button">Urgent</button>
     ${oMode==="list"?`<button class="chip ${oDone?"on":""}" id="oDone" type="button">Include delivered</button>`:""}
-    <span class="muted small" style="margin-left:auto">${os.length} order${os.length===1?"":"s"}</span>
+    <span class="muted small hint">${oMode==="board"?"Tap a card to open the order. Everything else updates from WhatsApp.":`${os.length} order${os.length===1?"":"s"}`}</span>
   </div>`;
+  const pad=n=>String(n).padStart(2,"0");
   let body;
   if(oMode==="board"){
     body=`<div class="board">${GROUPS.map(g=>{const cs=os.filter(o=>g.s.includes(o.status)).sort((a,b)=>(lateBy(b)||0)-(lateBy(a)||0)||(a.priority==="Urgent"?-1:1));
-      return `<div class="col"><div class="col-h"><span class="st ${g.k}"><i></i>${g.l}</span><span class="c">${cs.length}</span></div><div class="col-b">${cs.map(o=>`<button class="oc" data-open="${o.ref}" type="button">
-        <div class="t"><span class="ref">#${o.ref}</span>${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}${isIssueS(o.status)?`<span class="tag late">${o.status==="Repair"?"Repair":"Remake"}</span>`:""}${o.design==="Custom"&&g.k==="new"?'<span class="tag new">New design</span>':""}</div>
+      return `<div class="col"><div class="col-h"><span class="ci st ${g.k}">${svg(g.ic)}</span><b>${g.l}</b><span class="c">${pad(cs.length)}</span></div><div class="col-b">${cs.map(o=>`<button class="oc" data-open="${o.ref}" type="button">
+        <div class="t"><span class="ref">${o.ref}</span>${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}${isIssueS(o.status)?`<span class="tag late">${o.status==="Repair"?"Repair":"Remake"}</span>`:""}${o.design==="Custom"&&g.k==="new"?'<span class="tag new">Custom</span>':""}</div>
         <div class="c">${esc(o.customer)}</div><div class="i">${item(o)}</div>
         <div class="f"><span>${esc(o.factory||"No factory yet")}</span>${dueCell(o)}</div></button>`).join("")||'<div class="empty">Nothing here</div>'}</div></div>`;}).join("")}</div>`;
   } else {
     const sorted=os.slice().sort((a,b)=>CLOSED.includes(a.status)-CLOSED.includes(b.status)||(lateBy(b)||-99)-(lateBy(a)||-99));
-    body=`<div class="tbl"><table><thead><tr><th>Order</th><th>Customer</th><th>Item</th><th>Factory</th><th>Due</th><th>Status</th></tr></thead><tbody>
-      ${sorted.map(o=>`<tr data-open="${o.ref}"><td><span class="ref">#${o.ref}</span> ${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}</td><td>${esc(o.customer)}</td><td>${item(o)}</td><td>${esc(o.factory||"–")}</td><td>${dueCell(o)}</td><td>${status(o.status)}</td></tr>`).join("")}
+    body=`<div class="tbl"><table><thead><tr><th>Order</th><th>Shop</th><th>Piece</th><th>Factory</th><th>Due</th><th>Status</th></tr></thead><tbody>
+      ${sorted.map(o=>`<tr data-open="${o.ref}"><td><span class="ref">${o.ref}</span> ${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}</td><td><b>${esc(o.customer)}</b></td><td class="muted">${item(o)}</td><td>${esc(o.factory||"–")}</td><td>${dueCell(o)}</td><td>${status(o.status)}</td></tr>`).join("")}
       </tbody></table>${!sorted.length?'<div class="empty">No orders match.</div>':""}</div>`;
   }
-  $("#v-orders").innerHTML=`<div class="page-head"><div><h1>Orders</h1><p>Every order keeps one number from the first message to delivery.</p></div>
-    <div class="right"><div class="seg"><button class="${oMode==="board"?"on":""}" data-omode="board" type="button">Board</button><button class="${oMode==="list"?"on":""}" data-omode="list" type="button">List</button></div><button class="btn sm" id="csv" type="button" title="Copies the orders with the T22 Order DB columns, ready to paste into Google Sheets">Copy for Sheets</button></div></div>${tb}${body}`;
+  $("#v-orders").innerHTML=`<div class="page-head"><div><h1>Orders</h1><p>${open} open · ${S.orders.length} in total</p></div>
+    <div class="right"><label class="search">${svg("search")}<input id="oq" type="search" placeholder="Search order, shop, factory…" value="${esc(oQ)}" aria-label="Search orders"></label>
+    <div class="seg"><button class="${oMode==="list"?"on":""}" data-omode="list" type="button">${svg("list")}List</button><button class="${oMode==="board"?"on":""}" data-omode="board" type="button">${svg("board")}Board</button></div>
+    <button class="btn" id="csv" type="button" title="Copies the orders with the T22 Order DB columns, ready to paste into Google Sheets">Copy for Sheets</button></div></div>${tb}${body}`;
   if(keep){const i=$("#oq");i.focus();i.setSelectionRange(i.value.length,i.value.length);}
 }
 
@@ -799,7 +839,7 @@ function renderChats(){
 }
 
 /* Reports */
-function renderReports(){
+function renderFactories(){
   const st=FACTORIES.map(f=>facStats(f.name)).filter(s=>s.total).sort((a,b)=>b.total-a.total);
   const fromD=S.orders.reduce((m,o)=>o.date<m?o.date:m,S.today);
   const rate=s=>s.done<3?["soft","New"]:s.onTime>=.75&&s.issueRate<.1?["good","Reliable"]:s.onTime>=.55?["watch","Watch"]:["bad","Often late"];
@@ -812,15 +852,15 @@ function renderReports(){
   const best=st.filter(s=>s.done>=5).sort((a,b)=>b.onTime-a.onTime)[0];
   const mars=st.find(s=>s.name==="Mars");
   const top=cats[0];
-  $("#v-reports").innerHTML=`<div class="page-head"><div><h1>Reports</h1><p>Since ${fmt(fromD)} · ${S.orders.length} orders</p></div></div>
-  <div class="two" style="margin-bottom:18px">
-    <div class="insight"><span class="k">Factories</span><b>Mars</b> gets most orders (${mars?mars.total:0} of ${S.orders.length}) but has only <b>${mars?pct(mars.onTime):"–"}</b> ready on time. ${best?`<b>${best.name}</b> is at <b>${pct(best.onTime)}</b>; giving it more urgent orders would cut the late list.`:""}</div>
-    <div class="insight"><span class="k">Custom designs</span><b>${top?(top.p==="MS"?"Mangalsutras":top.p+"s"):""}</b> go custom ${top?pct(top.share):""} of the time. The most asked-for change is <b>${th[0].l.toLowerCase()}</b> (${th[0].n} orders): a good candidate for ready-made CAD templates.</div>
-  </div>
-  <div class="card" style="margin-bottom:18px"><div class="card-t"><h2>Factory performance</h2><div class="sub">How often each factory has the piece ready by the date it agreed.</div></div>
+  $("#v-factories").innerHTML=`<div class="page-head"><div><h1>Factories</h1><p>How each workshop is doing, since ${fmt(fromD)} · ${S.orders.length} orders</p></div></div>
+  <div class="card" style="margin-bottom:18px"><div class="card-t"><h2 class="ih">${svg("trophy")}Scorecard</h2><div class="sub">How often each factory has the piece ready by the date it agreed.</div></div>
     <div class="fgrid">${st.map(s=>{const [k,l]=rate(s);return `<div class="fc"><div class="h"><b>${s.name}</b><span class="tag ${k}">${l}</span></div>
       <div class="big">${s.done>=3?pct(s.onTime):"–"}<small>${s.done>=3?"on time":"too few finished orders"}</small></div><div class="meter"><i style="width:${s.done>=3?Math.round(s.onTime*100):0}%;background:${col[k]}"></i></div>
       <dl><dt>Orders</dt><dd>${s.total}</dd><dt>Open now</dt><dd>${s.open}${s.overdue?` <span style="color:var(--bad)">(${s.overdue} late)</span>`:""}</dd><dt>When late, by</dt><dd>${s.late?s.avgLate.toFixed(1)+" days":"–"}</dd><dt>Repairs / remakes</dt><dd>${s.repair} / ${s.wrong}</dd><dt>Replies in</dt><dd>${s.reply!=null?"~"+Math.round(s.reply)+" h":"–"}</dd></dl></div>`;}).join("")}</div>
+  </div>
+  <div class="two" style="margin-bottom:18px">
+    <div class="insight"><span class="k">Factories</span><b>Mars</b> gets most orders (${mars?mars.total:0} of ${S.orders.length}) but has only <b>${mars?pct(mars.onTime):"–"}</b> ready on time. ${best?`<b>${best.name}</b> is at <b>${pct(best.onTime)}</b>; giving it more urgent orders would cut the late list.`:""}</div>
+    <div class="insight"><span class="k">Custom designs</span><b>${top?(top.p==="MS"?"Mangalsutras":top.p+"s"):""}</b> go custom ${top?pct(top.share):""} of the time. The most asked-for change is <b>${th[0].l.toLowerCase()}</b> (${th[0].n} orders): a good candidate for ready-made CAD templates.</div>
   </div>
   <div class="two">
     <div class="card"><div class="card-t"><h2>Which categories go custom</h2><div class="sub">Share of orders that needed a new design (CAD).</div></div>
@@ -831,14 +871,33 @@ function renderReports(){
   </div>`;
 }
 
-/* Order panel */
+/* Shops */
+function renderShops(){
+  const by={};S.orders.forEach(o=>{(by[o.customer]||(by[o.customer]=[])).push(o);});
+  const shops=Object.entries(by).map(([name,os])=>{
+    const dates=os.map(o=>o.date).sort();const last=dates[dates.length-1];
+    const gaps=dates.slice(1).map((d,i)=>diff(d,dates[i])).filter(x=>x>0);
+    const every=gaps.length>=2?Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length):null;
+    const cnt={};os.forEach(o=>cnt[o.product]=(cnt[o.product]||0)+1);
+    const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([p])=>p==="MS"?"Mangalsutra":p);
+    return {name,total:os.length,open:os.filter(o=>!CLOSED.includes(o.status)).length,back:os.filter(o=>isIssueS(o.status)).length,last,every,top,quiet:every&&diff(S.today,last)>every*2};
+  }).sort((a,b)=>b.last.localeCompare(a.last));
+  const ago=d=>{const n=diff(S.today,d);return n<=0?"today":n===1?"yesterday":`${fmt(d)} (${n} days ago)`;};
+  $("#v-shops").innerHTML=`<div class="page-head"><div><h1>Shops</h1><p>Every retailer, how often they order, and what's open or coming back.</p></div></div>
+  <div class="shops">${shops.map(x=>`<button class="card shop" data-shop="${esc(x.name)}" type="button">
+    <h3>${esc(x.name)}</h3><div class="sub">Last order ${ago(x.last)}${x.every?` · usually every ${x.every}d`:""}</div>
+    <div class="tags"><span class="tag soft">${x.total} orders</span>${x.open?`<span class="tag urgent">${x.open} open</span>`:""}${x.back?`<span class="tag late">${x.back} back for repair</span>`:""}${x.quiet?'<span class="tag new">Quiet lately, worth a call</span>':""}</div>
+    ${x.top.length?`<div class="small muted">Mostly ${x.top.join(", ")}</div>`:""}</button>`).join("")}</div>`;
+}
+
+/* Order page */
 let drawerRef=null,issueForm=null;
-function openDrawer(ref){drawerRef=ref;issueForm=null;renderDrawer();$("#drawer").classList.add("on");$("#scrim").classList.add("on");}
-function closeDrawer(){drawerRef=null;$("#drawer").classList.remove("on");$("#scrim").classList.remove("on");}
+function openDrawer(ref){if(!byRef(ref))return;if(view!=="order")backTo=view==="today"||view==="orders"||view==="chats"||view==="shops"||view==="factories"?view:"orders";
+  drawerRef=ref;issueForm=null;view="order";$$(".view").forEach(x=>x.classList.toggle("on",x.id==="v-order"));renderAll();window.scrollTo(0,0);}
+function closeDrawer(){if(view!=="order")return;drawerRef=null;showView(backTo);}
+const STEPS=[["Placed","bag",["Enquiry"]],["At factory","factory",["Awaiting Factory","CAD Making","CAD Approval","In Production","Repair","Wrong Order"]],["Ready","package",["Ready at Factory"]],["Quality check","shield",["At Office · QC"]],["Shipped","truck",["Dispatched"]],["Delivered","check",["Completed"]]];
 function renderDrawer(){
   const o=byRef(drawerRef);if(!o)return closeDrawer();
-  const gs=GROUPS.filter(g=>g.k!=="cad"||o.design==="Custom");
-  const gi=CLOSED.includes(o.status)?gs.length:gs.indexOf(grpOf(o.status));
   const issue=isIssueS(o.status);
   const lb=lateBy(o);
   const sim=l=>`<span class="small muted" style="align-self:center">Demo:</span>${l}`;
@@ -862,22 +921,33 @@ function renderDrawer(){
     case "Cancelled":q="Cancelled";break;
   }
   const fmsgs=(S.fchat[o.factory]||[]).filter(m=>m.ref===o.ref||(m.refs||[]).includes(o.ref));
-  $("#drawer").innerHTML=`<div class="d-head"><div><div class="small muted">Order</div><h2>#${o.ref}</h2><div class="sub">${status(o.status)}${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}${isOver(o)?`<span class="tag late">${lb}d late</span>`:""}</div></div><button class="icon-btn x" id="dClose" type="button" aria-label="Close">×</button></div>
-  <div class="d-body">
-    ${o.status!=="Cancelled"?`<div><div class="prog">${gs.map((g,i)=>`<i class="${i<gi?"on":i===gi?(issue?"bad":"cur"):""}"></i>`).join("")}</div><div class="prog-l">${gs.map((g,i)=>`<span class="${i===gi?"on":""}">${g.l}</span>`).join("")}</div></div>`:""}
-    <div class="next"><div class="q">${q}</div>${h?`<div class="h">${h}</div>`:""}${a?`<div class="a">${a}</div>`:""}</div>
-    <div class="det">
-      <div><span>Customer</span><b>${esc(o.customer)}</b></div><div><span>Factory</span><b>${esc(o.factory||"Not chosen yet")}</b></div>
-      <div><span>Item</span><b>${o.product==="MS"?"Mangalsutra":o.product} · ${o.purity}</b></div><div><span>Weight</span><b>about ${o.weight} g</b></div>
-      <div><span>Size</span><b>${esc(o.size||"–")}</b></div><div><span>Quantity</span><b>${o.qty}</b></div>
-      <div><span>Design</span><b>${o.design==="Custom"?"New design (CAD)":"Catalogue"}${o.code?" · "+o.code:""}</b></div><div><span>Factory deadline</span><b>${o.deadline?fmt(o.deadline):"–"}${o.revised&&!CLOSED.includes(o.status)?` → ${fmt(o.revised)}`:""}</b></div>
-      <div><span>Ordered</span><b>${fmt(o.date)} via ${esc(o.src)}</b></div>
-      ${o.remarks?`<div class="w"><span>Notes</span><b>${esc(o.remarks)}</b></div>`:""}
+  const at=Math.max(0,STEPS.findIndex(x=>x[2].includes(o.status)));const done=o.status==="Completed",cx=o.status==="Cancelled";
+  const tracker=`<ol class="track-s" style="--n:${STEPS.length};--p:${cx?0:at/(STEPS.length-1)}">${STEPS.map(([l,ic],i)=>{const past=!cx&&(i<at||done),now=!cx&&i===at&&!done;
+    return `<li class="${past?"past":now?(issue?"now bad":"now"):""}"><span class="c">${svg(now&&issue?"x":past?"check":now?"dot":ic)}</span><b>${now&&issue?(o.status==="Repair"?"Repair":"Remake"):l}</b></li>`;}).join("")}</ol>${cx?'<p class="muted small" style="text-align:center;margin-top:10px">This order was cancelled.</p>':""}`;
+  const P=persona(o);
+  const fact=(l,v)=>`<div><span>${l}</span><b>${v}</b></div>`;
+  const tlc={f:"gold",r:"ok",x:"bad"};
+  $("#v-order").innerHTML=`<button class="back" id="dClose" type="button">${svg("back")}${({today:"Today",orders:"Orders",chats:"Chats",shops:"Shops",factories:"Factories"})[backTo]||"Orders"}</button>
+  <div class="page-head"><div><h1>Order ${o.ref}</h1><p>${esc(o.customer)} · placed ${fmt(o.date)} via ${esc(o.src)}</p></div>
+    <div class="right">${status(o.status)}${o.priority==="Urgent"?'<span class="tag urgent">Urgent</span>':""}${isOver(o)?`<span class="tag late">${lb}d late</span>`:""}</div></div>
+  <div class="card track-card">${tracker}</div>
+  <div class="cols">
+    <div class="grid">
+      ${q?`<div class="card next"><div class="card-t"><h2><i class="pulse"></i>Next step</h2></div><div class="next-b"><div><div class="q">${q}</div>${h?`<div class="h">${h}</div>`:""}</div>${a?`<div class="a">${a}</div>`:""}</div></div>`:""}
+      <div class="card"><div class="card-t"><h2>Piece</h2></div>
+        <div class="photo">${art(o.product,o.design==="Custom"&&["CAD Approval","In Production","Ready at Factory","At Office · QC","Dispatched","Completed"].includes(o.status))}<span class="tag soft">${o.design==="Custom"?"Design photo":"Catalogue photo"}</span></div>
+        <div class="facts">${fact("Product",o.product==="MS"?"Mangalsutra":o.product)}${fact("Purity",o.purity)}${fact("Design",o.design==="Custom"?"New design (CAD)":"Catalogue"+(o.code?" "+o.code:""))}
+          ${fact("Weight",`about ${o.weight} g`)}${fact("Size",esc(o.size||"–"))}${fact("Quantity",o.qty)}
+          ${fact("Factory",esc(o.factory||"Not chosen yet"))}${fact("Deadline",o.deadline?fmt(o.deadline):"–")}${fact("Factory's date",o.revised&&!CLOSED.includes(o.status)?fmt(o.revised):"–")}</div>
+        ${o.remarks?`<div class="remark">${esc(o.remarks)}</div>`:""}</div>
+      ${o.factory?`<div class="card"><div class="card-t"><h2>WhatsApp about this order</h2></div><div class="msgs inset">${
+        (fmsgs.length?fmsgs.slice(-6):[{from:"t22",text:factoryMsg(o),d:o.sentAt||o.date,tm:""}]).map(m=>`<div class="m ${m.from==="t22"?"out":""}">${m.art?art(m.art.p,m.art.cad):""}${wa(m.text)}<span class="tm">${fmt(m.d)} ${m.tm||""} · simulated</span></div>`).join("")}</div></div>`:""}
     </div>
-    ${o.factory?`<details><summary>Message sent to ${o.factory}</summary><div><pre class="wa">${wa(factoryMsg(o))}</pre></div></details>`:""}
-    ${fmsgs.length?`<details><summary>Factory chat for this order <span class="tag soft">${fmsgs.length}</span></summary><div><div class="msgs" style="max-height:260px;border-radius:12px;padding:12px">${fmsgs.slice(-6).map(m=>`<div class="m ${m.from==="t22"?"out":""}">${m.art?art(m.art.p,m.art.cad):""}${wa(m.text.length>240?m.text.slice(0,240)+"…":m.text)}<span class="tm">${fmt(m.d)} ${m.tm}</span></div>`).join("")}</div></div></details>`:""}
-    <details><summary>History <span class="tag soft">${o.hist.length}</span></summary><div><ul class="tl">${[...o.hist].reverse().map(x=>`<li><time>${fmt(x.d)}</time><span>${esc(x.t)}</span></li>`).join("")}</ul></div></details>
-    ${!CLOSED.includes(o.status)?`<div style="display:flex;gap:4px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px"><button class="btn link" data-act="urgent" data-ref="${o.ref}" type="button">${o.priority==="Urgent"?"Remove urgent":"Mark urgent"}</button>${WITH_FACTORY.includes(o.status)?`<button class="btn link" data-act="reroute" data-ref="${o.ref}" type="button">Change factory</button>`:""}<button class="btn link" data-act="cancel" data-ref="${o.ref}" type="button" style="margin-left:auto">Cancel order</button></div>`:""}
+    <div class="grid">
+      <div class="card"><div class="card-t"><h2>Retailer</h2></div><b>${esc(o.customer)}</b><div class="muted">${P?esc(P.name)+" · "+esc(P.contact)+", "+esc(P.city):"Orders on WhatsApp"}</div></div>
+      <div class="card"><div class="card-t"><h2>Timeline</h2></div><ul class="tl">${o.hist.map(x=>`<li class="${tlc[x.k]||""}"><span>${esc(x.t)}</span><time>${fmt(x.d)}</time></li>`).join("")}</ul></div>
+      ${!CLOSED.includes(o.status)?`<div class="o-links"><button class="btn link" data-act="urgent" data-ref="${o.ref}" type="button">${o.priority==="Urgent"?"Remove urgent":"Mark urgent"}</button>${WITH_FACTORY.includes(o.status)?`<button class="btn link" data-act="reroute" data-ref="${o.ref}" type="button">Change factory</button>`:""}<button class="btn link bad" data-act="cancel" data-ref="${o.ref}" type="button">${svg("x")}Cancel order</button></div>`:""}
+    </div>
   </div>`;
 }
 
@@ -890,7 +960,7 @@ function openHelp(){
       <li><span>Open <b>Chats</b> and tap <b>Hinglish order</b>. Confirm it in the chat.</span></li>
       <li><span>The order gets a number, goes to a factory and is confirmed. Approve the CAD that arrives.</span></li>
       <li><span>Switch to <b>Factories</b> and reply as the factory, for example “T434 ready”.</span></li>
-      <li><span>On <b>Overview</b>, mark it received and pass or fail the quality check.</span></li>
+      <li><span>On <b>Today</b>, mark it received and pass or fail the quality check.</span></li>
       <li><span>Press <b>Next day</b>: follow-ups go out and factories reply.</span></li>
     </ol>
     <h3>Automation</h3>
@@ -935,12 +1005,13 @@ function go(h){
   showView(v);
 }
 function showView(v){
-  view=VIEWS.some(x=>x[0]===v)?v:"overview";
+  if(v==="overview")v="today";if(v==="reports")v="factories";
+  view=VIEWS.some(x=>x[0]===v)?v:"today";drawerRef=null;
   try{if(location.hash!=="#"+view)history.replaceState(null,"","#"+view);}catch(e){}
   $$(".view").forEach(x=>x.classList.toggle("on",x.id==="v-"+view));
   renderAll();window.scrollTo(0,0);
 }
-function onRoute(){showView((location.hash||"#overview").slice(1));}
+function onRoute(){showView((location.hash||"#today").slice(1));}
 function exportCSV(){
   const cols=["Ref","Order Date","Customer Name","Factory","Factory Deadline","Status","Product","Days Remain","Priority","Remarks","Size","Purity","Design","Issue Type","Issue Date"];
   const rows=ordersFiltered(true).map(o=>{const i=o.issues[o.issues.length-1];return [o.ref,o.date,o.customer,o.factory,o.deadline,o.status,o.product,CLOSED.includes(o.status)||!o.deadline?"":daysLeft(o),o.priority,o.remarks,o.size,o.purity,o.design,i?i.type:"",i?i.date:""];});
@@ -960,6 +1031,7 @@ document.addEventListener("click",e=>{
   if(d.send){const sel=$(`[data-fsel="${d.send}"]`,t.parentElement)||$(`[data-fsel="${d.send}"]`);sendToFactory(byRef(d.send),sel.value);save();return renderAll();}
   if(d.act)return act(d.ref,d.act);
   if(d.problem){openDrawer(d.problem);return;}
+  if(d.shop!=null){oQ=d.shop;oFac="";oQuick="";oMode="list";return showView("orders");}
   if(d.omode){oMode=d.omode;return renderOrders();}
   if(d.quick!=null){oQuick=oQuick===d.quick?"":d.quick;return renderOrders();}
   if(d.cmode){cMode=d.cmode;cRef="";cOpen=false;return renderChats();}
@@ -988,7 +1060,6 @@ document.addEventListener("click",e=>{
     case "cBack":cOpen=false;return renderChats();
   }
 });
-$("#scrim").addEventListener("click",closeDrawer);
 $("#help").addEventListener("click",e=>{if(e.target.id==="help")$("#help").classList.remove("on");});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrawer();$("#help").classList.remove("on");}});
 document.addEventListener("submit",e=>{
