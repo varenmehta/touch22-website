@@ -1,38 +1,23 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Touch22 AI Studio · Live demos</title><meta name="description" content="Interactive demos of the Touch22 AI automations: trade assistant, cart follow-up, content studio, photo studio, retailer care and Trending@Touch."><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F0D0A'/%3E%3Ctext x='32' y='42' font-family='Georgia' font-size='26' fill='%23E8C77F' text-anchor='middle'%3E22%3C/text%3E%3C/svg%3E"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Touch22 AI Studio · Live demos</title><meta name="description" content="Interactive demos of the Touch22 AI automations: trade assistant, cart follow-up, content studio, photo studio, retailer care and Trending@Touch."><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23471c1f'/%3E%3Ctext x='32' y='42' font-family='Georgia' font-size='26' fill='%23d6b375' text-anchor='middle'%3E22%3C/text%3E%3C/svg%3E"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: an app shell. Brand bar + tab rail on top, one working screen per AI automation below. */
 :root{
-  --bg:#F5F6F3; --surface:#FFFFFF; --surface-2:#ECEFEA; --line:#D9DED7;
-  --ink:#16201E; --ink-2:#4F5B57; --ink-3:#7C8783;
-  --peacock:#0E5A54; --peacock-2:#E1EFEC; --on-peacock:#FFFFFF;
-  --gold:#A87A1C; --gold-2:#F4E8CC; --gold-ink:#6E4E0D;
-  --wa:#DCF8C6; --wa-ink:#11291C; --wa-bg:#E9E3DA;
-  --good:#1F7A3E; --warn:#A6620B; --bad:#B23A2E;
-  --shadow:0 1px 2px rgba(20,32,30,.06),0 8px 24px rgba(20,32,30,.06);
-  --f-display:"Tenor Sans","Optima","Candara","Segoe UI",sans-serif;
-  --f-body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  /* Touch22 Order Desk palette: burgundy, ivory, blush and gold, light only like the live app. */
+  --bg:#f7f6f4; --surface:#FFFFFF; --surface-2:#f3efed; --line:#ece6e4;
+  --ink:#211316; --ink-2:#5e5052; --ink-3:#8f8183;
+  --peacock:#67252a; --peacock-2:#f5eeef; --on-peacock:#FFFFFF;
+  --wine:#471c1f; --blush:#e1cdd1;
+  --gold:#b8893a; --gold-2:#fbf6ec; --gold-ink:#7a5a1e; --gold-soft:#d6b375;
+  --wa:#DCF8C6; --wa-ink:#11291C; --wa-bg:#efe7dd;
+  --good:#2f8059; --warn:#a8781c; --bad:#b8434a;
+  --shadow:0 1px 2px rgba(33,19,22,.04),0 8px 24px -12px rgba(33,19,22,.08);
+  --f-display:"Times New Roman",Times,"Liberation Serif",serif;
+  --f-body:"Nunito Sans","Avenir Next","Avenir","Segoe UI",system-ui,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0D1413; --surface:#141D1C; --surface-2:#1B2624; --line:#2A3735;
-  --ink:#E8EEEC; --ink-2:#AAB6B2; --ink-3:#7D8A86;
-  --peacock:#4FB3A8; --peacock-2:#183230; --on-peacock:#06201D;
-  --gold:#E2B654; --gold-2:#3A2E14; --gold-ink:#F1D48E;
-  --wa:#1F4A33; --wa-ink:#E3F5E8; --wa-bg:#101A18;
-  --good:#5BC682; --warn:#E6A24A; --bad:#EE7B6E;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0D1413; --surface:#141D1C; --surface-2:#1B2624; --line:#2A3735;
-  --ink:#E8EEEC; --ink-2:#AAB6B2; --ink-3:#7D8A86;
-  --peacock:#4FB3A8; --peacock-2:#183230; --on-peacock:#06201D;
-  --gold:#E2B654; --gold-2:#3A2E14; --gold-ink:#F1D48E;
-  --wa:#1F4A33; --wa-ink:#E3F5E8; --wa-bg:#101A18;
-  --good:#5BC682; --warn:#E6A24A; --bad:#EE7B6E;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
-  color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
@@ -279,14 +264,66 @@ input[type=range]{width:100%;accent-color:var(--peacock)}
   .rate{margin-left:0;width:100%}
   .msg{max-width:100%}
 }
+
+/* ---- Look of the live Touch22 Order Desk app ---- */
+body{font-size:14.5px;-webkit-font-smoothing:antialiased}
+body::before{background:rgba(255,255,255,.9)}
+.wrap{max-width:1152px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.top{background:rgba(255,255,255,.85);backdrop-filter:blur(12px) saturate(1.5);-webkit-backdrop-filter:blur(12px) saturate(1.5);border-bottom:1px solid rgba(236,230,228,.7)}
+.brandrow{min-height:64px;padding-block:10px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex:none}
+.logo img{height:18px;width:auto;display:block}
+.logo span{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);border-left:1px solid #e0d8d6;padding-left:10px;line-height:1.2}
+.tag{border-left:0;padding-left:0}
+.rate input{border-radius:999px;padding:6px 12px;background:#fff;border-color:#e0d8d6}
+.tabs{gap:4px;padding:0 0 12px;justify-content:center}
+.tab{border:0;border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;color:rgba(33,19,22,.7);transition:background .3s,color .3s,box-shadow .3s}
+.tab:hover{background:var(--peacock-2);color:var(--peacock)}
+.tab[aria-selected="true"]{background:var(--peacock);color:#fff;border:0;box-shadow:0 6px 16px -8px rgba(103,37,42,.7)}
+.tab .n{display:none}
+main{padding-block:28px 80px}
+.note{background:var(--gold-2);border:1px solid #f0e2c4;border-radius:16px;padding:12px 16px;font-size:13.5px;margin-top:0}
+.screen{animation:rise .45s cubic-bezier(.22,1,.36,1)}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+.screen-head{margin-bottom:22px}
+.screen-head h2{font-size:34px;line-height:1.1;color:var(--wine)}
+.screen-head .lede{color:var(--ink-3);margin-top:6px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--gold);margin-bottom:4px}
+h3{font-family:var(--f-body);font-weight:700;font-size:16px;letter-spacing:-.005em}
+.panel{border-radius:18px;box-shadow:var(--shadow)}
+.side .panel,.controls,.editor,.salescard,.ritem,.phase,.qs,.chartbox{padding:20px}
+.btn{border-radius:999px;border-color:#e0d8d6;padding:8px 16px;font-weight:700;font-size:13.5px;transition:background .2s,border-color .2s,color .2s,box-shadow .2s}
+.btn:hover{border-color:var(--peacock);color:var(--peacock)}
+.btn.primary:hover{background:var(--wine);border-color:var(--wine);color:#fff;filter:none;box-shadow:0 6px 16px -6px rgba(103,37,42,.55)}
+.btn:active{transform:scale(.97)}
+.btn.small{padding:5px 12px;font-size:12.5px}
+.chip{border-color:#e0d8d6;font-weight:600;font-size:13px}
+.pill{font-weight:700;font-size:12px}
+.pill.gold{background:var(--gold-2);color:var(--gold-ink)}
+.avatar{background:var(--wine);color:var(--gold-soft);font-family:var(--f-display)}
+.msg.me .bubble{background:var(--peacock)}
+.bubble{border-radius:16px}
+.composer input,select,textarea,.field input[type=text]{border-color:#e0d8d6;background:#fff}
+.composer input{background:var(--bg)}
+select,textarea,.field input[type=text]{border-radius:12px}
+.pcard,.ig,.fc{border-radius:14px}
+.step .ic{border-color:#e0d8d6}
+.step.cur{background:var(--peacock-2);border-radius:12px}
+.qi[aria-pressed="true"]{background:var(--peacock-2)}
+.date{border-radius:12px}
+.hl{background:var(--gold-2);border:1px solid #f0e2c4;border-radius:12px}
+.chartbox .bar.top{fill:var(--gold-soft)}
+.toast{background:var(--wine);color:#fff;border:1px solid var(--blush);border-radius:999px;font-weight:600;padding:10px 18px}
+.kw span{border-radius:999px}
+@media (max-width:900px){.tabs{justify-content:flex-start}.logo span{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
 <header class="top">
   <div class="wrap">
     <div class="brandrow">
-      <a class="mark" href="../index.html" style="text-decoration:none;color:inherit" title="Back to Touch22 home">TOUCH<b>22</b></a>
-      <div class="tag">AI Studio · a working demo of what we can automate</div><a class="btn small" href="../index.html" style="text-decoration:none;color:inherit">← Website</a>
+      <a class="logo" href="../index.html" title="Back to Touch22 home"><img src="img/word-dark.png" alt="Touch22"><span>AI<br>Studio</span></a>
+      <div class="tag">A working demo of what we can automate</div><a class="btn small" href="../index.html" style="text-decoration:none;color:inherit">← Website</a>
       <div class="rate"><label for="rate22">22KT rate ₹/g</label><input id="rate22" type="number" value="11800" step="10" min="1000"><span class="pill gold">example rate</span></div>
     </div>
     <nav class="tabs" role="tablist" aria-label="Demo screens" id="tabs"></nav>
@@ -878,7 +915,7 @@ function renderPhoto(){
   const w=S*sc,off=(S-w)/2;
   co.save();co.shadowColor="rgba(0,0,0,.45)";co.shadowBlur=36;co.shadowOffsetY=18;co.drawImage(c,off,off+S*.02,w,w);co.restore();
   co.drawImage(c,off,off+S*.02,w,w);
-  co.font="600 22px Figtree, sans-serif";co.fillStyle=["velvet","festive","peacock"].includes(bgKey)?"rgba(255,255,255,.75)":"rgba(0,0,0,.5)";co.textAlign="right";co.fillText("TOUCH22",S-28,S-28);
+  co.font="600 22px "Nunito Sans", sans-serif";co.fillStyle=["velvet","festive","peacock"].includes(bgKey)?"rgba(255,255,255,.75)":"rgba(0,0,0,.5)";co.textAlign="right";co.fillText("TOUCH22",S-28,S-28);
   const pct=total?Math.round(kept/total*100):0;
   $("#phCheck").innerHTML=`<span class="ok">✓</span><div><b>Design kept exactly.</b> The piece in the output is the same pixels as your photo, only resized and moved. ${pct}% of the frame was kept as jewellery and the rest replaced with the backdrop. ${srcIsUpload?"Raise or lower the strength if edges look rough.":"This sample is an illustration; drop a real product photo to see it on your own piece."}<div class="src" style="margin-top:4px">In production a dedicated cut-out model handles shiny metal and busy backgrounds; the rule that the jewellery is never redrawn stays the same.</div></div>`;
 }
